@@ -1,0 +1,147 @@
+//
+//  QueryParameterTests 2.swift
+//  Vyper
+//
+//  Created by Noah Kamara on 23.08.2025.
+//
+
+import MacroTesting
+import Testing
+@testable import VyperMacros
+
+@Suite("Query Parameter", .macros([APIMacro.self]))
+struct QueryParameterTests {
+    @Test
+    func base() {
+        assertMacro {
+            """
+            @API
+            struct TestController {
+                @GET(":foo", ":bar")
+                func list(@Query foo: String, @Query bar baz: Int) -> Response {
+                    Response(statusCode: 200)
+                }
+            }
+            """
+        } expansion: {
+            """
+            struct TestController {
+                @GET(":foo", ":bar")
+                func list(@Query foo: String, @Query bar baz: Int) -> Response {
+                    Response(statusCode: 200)
+                }
+            }
+
+            extension TestController {
+                func boot(routes: RoutesBuilder) throws {
+                    routes.on(.GET, ":foo", ":bar") { request in
+                        let foo: String = try request.query.get(at: "foo")
+                        let bar: Int = try request.query.get(at: "bar")
+                        return self.list(foo: foo, bar: bar)
+                    }
+                }
+            }
+            """
+        }
+    }
+
+    @Test
+    func optionalParameter() {
+        assertMacro {
+            """
+            @API
+            struct TestController {
+                @GET(":foo", ":bar")
+                func list(@Query foo: String?, @Query bar: Int?) -> Response {
+                    Response(statusCode: 200)
+                }
+            }
+            """
+        } expansion: {
+            """
+            struct TestController {
+                @GET(":foo", ":bar")
+                func list(@Query foo: String?, @Query bar: Int?) -> Response {
+                    Response(statusCode: 200)
+                }
+            }
+
+            extension TestController {
+                func boot(routes: RoutesBuilder) throws {
+                    routes.on(.GET, ":foo", ":bar") { request in
+                        let foo: String? = request.query["foo"]
+                        let bar: Int? = request.query["bar"]
+                        return self.list(foo: foo, bar: bar)
+                    }
+                }
+            }
+            """
+        }
+    }
+
+    @Test
+    func requiredParameter() {
+        assertMacro {
+            """
+            @API
+            struct TestController {
+                @GET(":foo", ":bar")
+                func list(@Query foo: String) -> Response {
+                    Response(statusCode: 200)
+                }
+            }
+            """
+        } expansion: {
+            """
+            struct TestController {
+                @GET(":foo", ":bar")
+                func list(@Query foo: String) -> Response {
+                    Response(statusCode: 200)
+                }
+            }
+
+            extension TestController {
+                func boot(routes: RoutesBuilder) throws {
+                    routes.on(.GET, ":foo", ":bar") { request in
+                        let foo: String = try request.query.get(at: "foo")
+                        return self.list(foo: foo)
+                    }
+                }
+            }
+            """
+        }
+    }
+
+    @Test
+    func convertibleParameter() {
+        assertMacro {
+            """
+            @API
+            struct TestController {
+                @GET(":foo", ":bar")
+                func list(@Query foo: Int) -> Response {
+                    Response(statusCode: 200)
+                }
+            }
+            """
+        } expansion: {
+            """
+            struct TestController {
+                @GET(":foo", ":bar")
+                func list(@Query foo: Int) -> Response {
+                    Response(statusCode: 200)
+                }
+            }
+
+            extension TestController {
+                func boot(routes: RoutesBuilder) throws {
+                    routes.on(.GET, ":foo", ":bar") { request in
+                        let foo: Int = try request.query.get(at: "foo")
+                        return self.list(foo: foo)
+                    }
+                }
+            }
+            """
+        }
+    }
+}
