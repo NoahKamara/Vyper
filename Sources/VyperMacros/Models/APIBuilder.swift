@@ -7,6 +7,7 @@
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
+import VyperCore
 
 enum APIBuilder {
     static func build(
@@ -43,7 +44,7 @@ enum APIBuilder {
         )
     }
 
-    private static func buildRoute(_ route: API.Route) throws -> FunctionCallExprSyntax {
+    private static func buildRoute(_ route: APIRoute) throws -> FunctionCallExprSyntax {
         let parameterBuilders = try route.parameters.map { try self.buildParameterExpression($0) }
 
         var routeFunctionCall: any ExprSyntaxProtocol = FunctionCallExprSyntax(
@@ -101,7 +102,7 @@ enum APIBuilder {
         .with(\.trailingClosure, closure)
     }
 
-    static func buildParameterExpression(_ parameter: API.Route
+    static func buildParameterExpression(_ parameter: APIRoute
         .Parameter
     ) throws -> VariableDeclSyntax {
         let initializerExpression: ExprSyntax = switch parameter.kind {

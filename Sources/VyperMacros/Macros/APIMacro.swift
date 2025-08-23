@@ -23,7 +23,7 @@ public struct APIMacro: ExtensionMacro {
         ////                .declSyntax(),
 //        ]
 
-        let api = try API.parse(declaration)
+        let api = try APIParser.parse(declaration)
 
         let conformanceExtension = try APIBuilder.build(api: api, extendedType: type)
 

@@ -6,6 +6,7 @@
 //
 
 import SwiftSyntax
+import VyperCore
 
 enum APIParser {
     static func parse(_ declaration: some DeclSyntaxProtocol) throws -> API {
@@ -22,9 +23,11 @@ enum APIParser {
         )
     }
 
-    private static func parseFunction(_ function: FunctionDeclSyntax) throws -> API.Route? {
+    private static func parseFunction(_ function: FunctionDeclSyntax) throws -> APIRoute? {
         var method: ExprSyntax? = nil
         var path: [ExprSyntax] = []
+        
+
 
         for attribute in function.functionAttributes {
             let name = attribute.attributeName.trimmedDescription
@@ -64,8 +67,8 @@ enum APIParser {
 
     private static func parseRouteParameter(
         _ parameter: FunctionParameterSyntax
-    ) throws -> API.Route.Parameter {
-        let kinds: [API.Route.Parameter.Kind] = parameter.attributes.compactMap { attr in
+    ) throws -> APIRoute.Parameter {
+        let kinds: [APIRoute.Parameter.Kind] = parameter.attributes.compactMap { attr in
             switch attr.as(AttributeSyntax.self)?.attributeName.trimmedDescription {
             case "Path": .path
             case "Header": .header
@@ -90,7 +93,7 @@ enum APIParser {
             (parameter.type.trimmedDescription, false)
         }
 
-        return API.Route.Parameter(
+        return APIRoute.Parameter(
             name: parameter.firstName.text,
             type: type,
             isOptional: isOptional,

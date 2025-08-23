@@ -35,6 +35,20 @@
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "APIDocExtractor"
+               BuildableName = "APIDocExtractor"
+               BlueprintName = "APIDocExtractor"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -55,7 +69,19 @@
             </BuildableReference>
             <SkippedTests>
                <Test
+                  Identifier = "EffectSpecifierTests">
+               </Test>
+               <Test
                   Identifier = "HTTPDecoratorTests">
+               </Test>
+               <Test
+                  Identifier = "HTTPMethodDecoratorTests">
+               </Test>
+               <Test
+                  Identifier = "PathParameterTests">
+               </Test>
+               <Test
+                  Identifier = "QueryParameterTests">
                </Test>
             </SkippedTests>
          </TestableReference>
@@ -71,6 +97,16 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "APIDocExtractor"
+            BuildableName = "APIDocExtractor"
+            BlueprintName = "APIDocExtractor"
+            ReferencedContainer = "container:">
+         </BuildableReference>
+      </BuildableProductRunnable>
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
@@ -87,15 +123,16 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
-      <MacroExpansion>
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "VyperClient"
-            BuildableName = "VyperClient"
-            BlueprintName = "VyperClient"
+            BlueprintIdentifier = "APIDocExtractor"
+            BuildableName = "APIDocExtractor"
+            BlueprintName = "APIDocExtractor"
             ReferencedContainer = "container:">
          </BuildableReference>
-      </MacroExpansion>
+      </BuildableProductRunnable>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

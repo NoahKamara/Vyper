@@ -61,23 +61,23 @@ struct TodoDto: Codable, Content {
 // }
 
 //@API
-struct TestController {
-    let store = TodoStore()
-
-//    @HTTP(.GET, .anything)
-//    func list() async -> [TodoDto] {
-//        await self.store.allTodos()
+//struct TestController {
+//    let store = TodoStore()
+//
+////    @HTTP(.GET, .anything)
+////    func list() async -> [TodoDto] {
+////        await self.store.allTodos()
+////    }
+//
+//    @GET(":todoID")
+//    func retrieve(@Path todoID id: Int) async throws -> TodoDto {
+//        if let todo = await self.store.todo(id: id) {
+//            return todo
+//        } else {
+//            throw Abort(.notFound)
+//        }
 //    }
-
-    @GET(":todoID")
-    func retrieve(@Path todoID id: Int) async throws -> TodoDto {
-        if let todo = await self.store.todo(id: id) {
-            return todo
-        } else {
-            throw Abort(.notFound)
-        }
-    }
-
-//    @GET
-//    func index() -> [Todo]
-}
+//
+////    @GET
+////    func index() -> [Todo]
+//}

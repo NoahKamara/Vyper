@@ -23,21 +23,35 @@ let package = Package(
         .package(url: "https://github.com/pointfreeco/swift-macro-testing", from: "0.6.3"),
     ],
     targets: [
+        .target(
+            name: "Vyper",
+            dependencies: [
+                "VyperCore",
+                "VyperMacros",
+                .product(name: "Vapor", package: "vapor"),
+            ],
+            plugins: [
+                "APIDocPlugin"
+            ]
+        ),
+
         .macro(
             name: "VyperMacros",
             dependencies: [
+                "VyperCore",
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
             ]
         ),
 
         .target(
-            name: "Vyper",
+            name: "VyperCore",
             dependencies: [
-                "VyperMacros",
                 .product(name: "Vapor", package: "vapor"),
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
             ]
         ),
+
 
         .executableTarget(
             name: "VyperClient",
@@ -47,10 +61,24 @@ let package = Package(
             ]
         ),
 
+        .plugin(
+            name: "APIDocPlugin",
+            capability: .buildTool(),
+            path: "Plugins/APIDocPlugin"
+        ),
+
+        .executableTarget(
+            name: "APIDocExtractor",
+            dependencies: [
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+            ]
+        ),
+
         .testTarget(
             name: "VyperTests",
             dependencies: [
                 "VyperMacros",
+                "VyperCore",
                 .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),
                 .product(name: "MacroTesting", package: "swift-macro-testing"),
             ]
