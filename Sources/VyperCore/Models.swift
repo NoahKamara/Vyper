@@ -1,8 +1,7 @@
 //
 //  API.swift
-//  Vyper
 //
-//  Created by Noah Kamara on 23.08.2025.
+//  Copyright © 2024 Noah Kamara.
 //
 
 import SwiftSyntax
@@ -31,7 +30,6 @@ public struct API {
         self.routes = routes
     }
 }
-
 
 public struct APIRoute {
     public struct Parameter {

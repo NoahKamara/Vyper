@@ -1,24 +1,31 @@
 //
-//  HTTPMethodDecoratorTests 2.swift
-//  Vyper
+//  HTTPDecoratorTests.swift
 //
-//  Created by Noah Kamara on 23.08.2025.
+//  Copyright © 2024 Noah Kamara.
 //
-
 
 import MacroTesting
 import Testing
 @testable import VyperMacros
 
-@Suite("Effect Specifiers", .macros([APIMacro.self]))
-struct EffectSpecifierTests {
-    @Test
-    func basic() {
+@Suite("HTTPMethod Decorator", .macros([APIMacro.self]), .tags(.macro))
+struct HTTPMethodDecoratorTests {
+    static let httpMethods = [
+        "GET", "DELETE", "PATCH", "POST", "PUT", "OPTIONS", "HEAD", "TRACE", "CONNECT",
+    ]
+
+    static let paths = [
+        #""constant""#,
+        #""constant", "parameter", "*", "**""#,
+    ]
+
+    @Test(arguments: httpMethods)
+    func basicHTTP(method: String) {
         assertMacro {
             """
             @API
             struct TestController {
-                @GET
+                @HTTP(.\(method))
                 func list() -> Response {
                     Response(statusCode: 200)
                 }
@@ -27,7 +34,7 @@ struct EffectSpecifierTests {
         } expansion: {
             """
             struct TestController {
-                @GET
+                @HTTP(.\(method))
                 func list() -> Response {
                     Response(statusCode: 200)
                 }
@@ -35,7 +42,7 @@ struct EffectSpecifierTests {
 
             extension TestController {
                 func boot(routes: RoutesBuilder) throws {
-                    routes.on(.GET) { request in
+                    routes.on(.\(method)) { request in
                         return self.list()
                     }
                 }
@@ -44,14 +51,14 @@ struct EffectSpecifierTests {
         }
     }
 
-    @Test
-    func async() {
+    @Test(arguments: httpMethods)
+    func methodHelper(method: String) {
         assertMacro {
             """
             @API
             struct TestController {
-                @GET
-                func list() async -> Response {
+                @\(method)
+                func list() -> Response {
                     Response(statusCode: 200)
                 }
             }
@@ -59,16 +66,16 @@ struct EffectSpecifierTests {
         } expansion: {
             """
             struct TestController {
-                @GET
-                func list() async -> Response {
+                @\(method)
+                func list() -> Response {
                     Response(statusCode: 200)
                 }
             }
 
             extension TestController {
                 func boot(routes: RoutesBuilder) throws {
-                    routes.on(.GET) { request in
-                        return await self.list()
+                    routes.on(.\(method)) { request in
+                        return self.list()
                     }
                 }
             }
@@ -76,14 +83,14 @@ struct EffectSpecifierTests {
         }
     }
 
-    @Test
-    func throwing() {
+    @Test(arguments: paths)
+    func path(path: String) {
         assertMacro {
             """
             @API
             struct TestController {
-                @GET
-                func list() throws -> Response {
+                @HTTP(.GET, \(path))
+                func list() -> Response {
                     Response(statusCode: 200)
                 }
             }
@@ -91,16 +98,16 @@ struct EffectSpecifierTests {
         } expansion: {
             """
             struct TestController {
-                @GET
-                func list() throws -> Response {
+                @HTTP(.GET, \(path))
+                func list() -> Response {
                     Response(statusCode: 200)
                 }
             }
 
             extension TestController {
                 func boot(routes: RoutesBuilder) throws {
-                    routes.on(.GET) { request in
-                        return try self.list()
+                    routes.on(.GET, \(path)) { request in
+                        return self.list()
                     }
                 }
             }
@@ -108,35 +115,31 @@ struct EffectSpecifierTests {
         }
     }
 
-    @Test
-    func asyncThrowing() {
+    @Test(arguments: paths)
+    func methodHelperPath(path: String) {
         assertMacro {
             """
             @API
             struct TestController {
-                @GET
-                func list() async throws -> Response {
+                @GET(\(path))
+                func list() -> Response {
                     Response(statusCode: 200)
                 }
             }
             """
-        } diagnostics: {
-            """
-
-            """
         } expansion: {
             """
             struct TestController {
-                @GET
-                func list() async throws -> Response {
+                @GET(\(path))
+                func list() -> Response {
                     Response(statusCode: 200)
                 }
             }
 
             extension TestController {
                 func boot(routes: RoutesBuilder) throws {
-                    routes.on(.GET) { request in
-                        return try await self.list()
+                    routes.on(.GET, \(path)) { request in
+                        return self.list()
                     }
                 }
             }

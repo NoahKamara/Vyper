@@ -49,6 +49,34 @@
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "VyperOpenAPI"
+               BuildableName = "VyperOpenAPI"
+               BlueprintName = "VyperOpenAPI"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "VyperOpenAPITool"
+               BuildableName = "VyperOpenAPITool"
+               BlueprintName = "VyperOpenAPITool"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -85,6 +113,16 @@
                </Test>
             </SkippedTests>
          </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "VyperOpenAPITests"
+               BuildableName = "VyperOpenAPITests"
+               BlueprintName = "VyperOpenAPITests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction
@@ -101,9 +139,9 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "APIDocExtractor"
-            BuildableName = "APIDocExtractor"
-            BlueprintName = "APIDocExtractor"
+            BlueprintIdentifier = "VyperOpenAPITool"
+            BuildableName = "VyperOpenAPITool"
+            BlueprintName = "VyperOpenAPITool"
             ReferencedContainer = "container:">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -127,9 +165,9 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "APIDocExtractor"
-            BuildableName = "APIDocExtractor"
-            BlueprintName = "APIDocExtractor"
+            BlueprintIdentifier = "VyperOpenAPITool"
+            BuildableName = "VyperOpenAPITool"
+            BlueprintName = "VyperOpenAPITool"
             ReferencedContainer = "container:">
          </BuildableReference>
       </BuildableProductRunnable>

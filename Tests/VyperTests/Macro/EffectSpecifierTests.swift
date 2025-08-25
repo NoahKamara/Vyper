@@ -10,7 +10,11 @@ import MacroTesting
 import Testing
 @testable import VyperMacros
 
-@Suite("Effect Specifiers", .macros([APIMacro.self]))
+extension Tag {
+    @Tag static var macro: Self
+}
+
+@Suite("Effect Specifiers", .macros([APIMacro.self]), .tags(.macro))
 struct EffectSpecifierTests {
     @Test
     func basic() {

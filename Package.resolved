@@ -1,5 +1,5 @@
 {
-  "originHash" : "0995ca0e7cd7b33bea010a44e2a30192ee00ed1d34de6991c5478e1007e670e3",
+  "originHash" : "861fe15eb4769d227626c540e5e35ff6d683aa54bbc898cd5c25f92ba693cfc7",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -92,6 +92,15 @@
       }
     },
     {
+      "identity" : "swift-cmark",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swiftlang/swift-cmark.git",
+      "state" : {
+        "branch" : "gfm",
+        "revision" : "cbd8eae0689857c873063f28b9a80419ec718e20"
+      }
+    },
+    {
       "identity" : "swift-collections",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-collections.git",
@@ -128,6 +137,15 @@
       }
     },
     {
+      "identity" : "swift-docc-symbolkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swiftlang/swift-docc-symbolkit.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "ebe89c7da4cf03ded04cd708f3399087c6f2dad7"
+      }
+    },
+    {
       "identity" : "swift-http-structured-headers",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-http-structured-headers.git",
@@ -161,6 +179,15 @@
       "state" : {
         "revision" : "2de00af725ff4c43c9a90d7893835de312653169",
         "version" : "0.6.3"
+      }
+    },
+    {
+      "identity" : "swift-markdown",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swiftlang/swift-markdown.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "c281baa59e2b0d3ddc72848741217af811f66d39"
       }
     },
     {

@@ -1,23 +1,24 @@
 //
-//  PathParameterTests.swift
+//  QueryParameterTests 2.swift
+//  Vyper
 //
-//  Copyright © 2024 Noah Kamara.
+//  Created by Noah Kamara on 23.08.2025.
 //
 
 import MacroTesting
 import Testing
 @testable import VyperMacros
 
-@Suite("Path Parameter", .macros([APIMacro.self]))
-struct PathParameterTests {
+@Suite("Query Parameter", .macros([APIMacro.self]), .tags(.macro))
+struct QueryParameterTests {
     @Test
-    func optionalParameter() {
+    func base() {
         assertMacro {
             """
             @API
             struct TestController {
                 @GET(":foo", ":bar")
-                func list(@Path foo: String?, @Path bar: Int?) -> Response {
+                func list(@Query foo: String, @Query bar baz: Int) -> Response {
                     Response(statusCode: 200)
                 }
             }
@@ -26,7 +27,7 @@ struct PathParameterTests {
             """
             struct TestController {
                 @GET(":foo", ":bar")
-                func list(@Path foo: String?, @Path bar: Int?) -> Response {
+                func list(@Query foo: String, @Query bar baz: Int) -> Response {
                     Response(statusCode: 200)
                 }
             }
@@ -34,8 +35,42 @@ struct PathParameterTests {
             extension TestController {
                 func boot(routes: RoutesBuilder) throws {
                     routes.on(.GET, ":foo", ":bar") { request in
-                        let foo: String? = request.parameters.get("foo")
-                        let bar: Int? = request.parameters.get("bar")
+                        let foo: String = try request.query.get(at: "foo")
+                        let bar: Int = try request.query.get(at: "bar")
+                        return self.list(foo: foo, bar: bar)
+                    }
+                }
+            }
+            """
+        }
+    }
+
+    @Test
+    func optionalParameter() {
+        assertMacro {
+            """
+            @API
+            struct TestController {
+                @GET(":foo", ":bar")
+                func list(@Query foo: String?, @Query bar: Int?) -> Response {
+                    Response(statusCode: 200)
+                }
+            }
+            """
+        } expansion: {
+            """
+            struct TestController {
+                @GET(":foo", ":bar")
+                func list(@Query foo: String?, @Query bar: Int?) -> Response {
+                    Response(statusCode: 200)
+                }
+            }
+
+            extension TestController {
+                func boot(routes: RoutesBuilder) throws {
+                    routes.on(.GET, ":foo", ":bar") { request in
+                        let foo: String? = request.query["foo"]
+                        let bar: Int? = request.query["bar"]
                         return self.list(foo: foo, bar: bar)
                     }
                 }
@@ -51,7 +86,7 @@ struct PathParameterTests {
             @API
             struct TestController {
                 @GET(":foo", ":bar")
-                func list(@Path foo: String) -> Response {
+                func list(@Query foo: String) -> Response {
                     Response(statusCode: 200)
                 }
             }
@@ -60,7 +95,7 @@ struct PathParameterTests {
             """
             struct TestController {
                 @GET(":foo", ":bar")
-                func list(@Path foo: String) -> Response {
+                func list(@Query foo: String) -> Response {
                     Response(statusCode: 200)
                 }
             }
@@ -68,7 +103,7 @@ struct PathParameterTests {
             extension TestController {
                 func boot(routes: RoutesBuilder) throws {
                     routes.on(.GET, ":foo", ":bar") { request in
-                        let foo: String = try request.parameters.require("foo")
+                        let foo: String = try request.query.get(at: "foo")
                         return self.list(foo: foo)
                     }
                 }
@@ -84,7 +119,7 @@ struct PathParameterTests {
             @API
             struct TestController {
                 @GET(":foo", ":bar")
-                func list(@Path foo: Int) -> Response {
+                func list(@Query foo: Int) -> Response {
                     Response(statusCode: 200)
                 }
             }
@@ -93,7 +128,7 @@ struct PathParameterTests {
             """
             struct TestController {
                 @GET(":foo", ":bar")
-                func list(@Path foo: Int) -> Response {
+                func list(@Query foo: Int) -> Response {
                     Response(statusCode: 200)
                 }
             }
@@ -101,7 +136,7 @@ struct PathParameterTests {
             extension TestController {
                 func boot(routes: RoutesBuilder) throws {
                     routes.on(.GET, ":foo", ":bar") { request in
-                        let foo: Int = try request.parameters.require("foo")
+                        let foo: Int = try request.query.get(at: "foo")
                         return self.list(foo: foo)
                     }
                 }

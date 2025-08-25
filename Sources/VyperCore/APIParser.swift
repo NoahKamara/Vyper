@@ -1,39 +1,45 @@
 //
 //  APIParser.swift
-//  Vyper
 //
-//  Created by Noah Kamara on 23.08.2025.
+//  Copyright © 2024 Noah Kamara.
 //
 
+import SwiftDiagnostics
 import SwiftSyntax
-import VyperCore
 
-enum APIParser {
-    static func parse(_ declaration: some DeclSyntaxProtocol) throws -> API {
+package enum APIParser {
+    package struct ParsingError: Error, CustomStringConvertible {
+        package let message: String
+
+        init(_ message: String) {
+            self.message = message
+        }
+
+        package var description: String {
+            self.message
+        }
+    }
+
+    package static func parse(_ declaration: some DeclSyntaxProtocol) throws -> API {
         guard let structDecl = declaration.as(StructDeclSyntax.self) else {
-            throw VyperMacrosError("APIs must be structs for now")
+            throw ParsingError("APIs must be structs for now")
         }
 
         return try API(
             name: structDecl.name.text,
-            routes: structDecl.functions.compactMap { try parseFunction($0) }
-            //            access: proto.access,
-            //            attributes: proto.protocolAttributes.compactMap { EndpointAttribute($0) },
-            //            endpoints: try proto.functions.map( { try parse($0) })
+            routes: structDecl.functions.compactMap { try self.parseFunction($0) }
         )
     }
 
     private static func parseFunction(_ function: FunctionDeclSyntax) throws -> APIRoute? {
         var method: ExprSyntax? = nil
         var path: [ExprSyntax] = []
-        
-
 
         for attribute in function.functionAttributes {
             let name = attribute.attributeName.trimmedDescription
             switch name {
             case "GET", "DELETE", "PATCH", "POST", "PUT", "OPTIONS", "HEAD", "TRACE", "CONNECT":
-                method = ".\(raw: name)"
+                method = ExprSyntax(MemberAccessExprSyntax(name: .identifier(name)))
                 if case .argumentList(let list) = attribute.arguments {
                     path = list.map(\.expression)
                 }
@@ -43,7 +49,10 @@ enum APIParser {
                     method = list.first?.expression
                     path = list.dropFirst().map(\.expression)
                 } else {
-                    throw VyperMacrosError("Missing method argument for @HTTP")
+                    throw DiagnosticBuilder(for: attribute)
+                        .severity(.error)
+                        .message("Missing HTTPMethod")
+                        .build()
                 }
 
             default:
@@ -55,11 +64,11 @@ enum APIParser {
             return nil
         }
 
-        return .init(
+        return try .init(
             name: function.name.text,
             method: method,
             path: path,
-            parameters: try function.parameters.map({ try parseRouteParameter($0) }),
+            parameters: function.parameters.map { try self.parseRouteParameter($0) },
             isThrowing: function.isThrowing,
             isAsync: function.isAsync
         )
@@ -80,9 +89,11 @@ enum APIParser {
         }
 
         guard kinds.count == 1 else {
-            throw VyperMacrosError(
-                "Route parameters must have exactly one of @Path, @Header, @Query, @Field, or @Body"
-            )
+            throw DiagnosticBuilder(for: parameter)
+                .message(
+                    "Route parameters must have exactly one of @Path, @Header, @Query, @Field, or @Body"
+                )
+                .build()
         }
 
         let (type, isOptional): (String, Bool) = if let optionalType = parameter.type.as(
@@ -102,7 +113,7 @@ enum APIParser {
     }
 }
 
-fileprivate extension FunctionDeclSyntax {
+private extension FunctionDeclSyntax {
     var isThrowing: Bool {
         signature.effectSpecifiers?.throwsClause?.throwsSpecifier != nil
     }
@@ -123,12 +134,10 @@ fileprivate extension FunctionDeclSyntax {
     }
 }
 
-
-fileprivate extension StructDeclSyntax {
+private extension StructDeclSyntax {
     var functions: [FunctionDeclSyntax] {
         memberBlock
             .members
             .compactMap { $0.decl.as(FunctionDeclSyntax.self) }
     }
 }
-

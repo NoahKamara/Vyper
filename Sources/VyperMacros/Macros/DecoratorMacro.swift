@@ -7,6 +7,7 @@
 import SwiftDiagnostics
 import SwiftSyntax
 import SwiftSyntaxMacros
+import VyperCore
 
 struct DecoratorMacro: PeerMacro {
     static func expansion(
@@ -14,21 +15,25 @@ struct DecoratorMacro: PeerMacro {
         providingPeersOf declaration: some DeclSyntaxProtocol,
         in context: some MacroExpansionContext
     ) throws -> [DeclSyntax] {
-        let messageID = MessageID(domain: "decorator", id: "papyrus")
-        let message = MyDiagnostic(
-            message: "processed decorator",
-            diagnosticID: messageID,
-            severity: .note
-        )
-        let diagnostic = Diagnostic(node: Syntax(node), message: message)
+        let decoratorName = node.attributeName.trimmedDescription
+        let diagnostics = DiagnosticBuilder(for: node).messageID(id: decoratorName)
+
+        guard declaration.is(FunctionDeclSyntax.self) else {
+            let diagnostic = diagnostics
+                .severity(.warning)
+                .message("@\(decoratorName) can only be applied to functions")
+                .build()
+
+            context.diagnose(diagnostic)
+            return []
+        }
+
+        let diagnostic = diagnostics
+            .severity(.note)
+            .message("@\(decoratorName) found")
+            .build()
+
         context.diagnose(diagnostic)
-        // TODO: Add some compiler safety to ensure certain attributes can't be on certain members.
         return []
     }
-}
-
-struct MyDiagnostic: DiagnosticMessage {
-    let message: String
-    let diagnosticID: MessageID
-    let severity: DiagnosticSeverity
 }
