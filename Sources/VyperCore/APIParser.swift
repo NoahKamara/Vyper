@@ -31,7 +31,7 @@ package enum APIParser {
         )
     }
 
-    private static func parseFunction(_ function: FunctionDeclSyntax) throws -> APIRoute? {
+    package static func parseFunction(_ function: FunctionDeclSyntax) throws -> APIRoute? {
         var method: ExprSyntax? = nil
         var path: [ExprSyntax] = []
 
@@ -115,11 +115,11 @@ package enum APIParser {
 
 private extension FunctionDeclSyntax {
     var isThrowing: Bool {
-        signature.effectSpecifiers?.throwsClause?.throwsSpecifier != nil
+        signature.effectSpecifiers?.throwsClause?.throwsSpecifier.tokenKind == .keyword(.throws)
     }
 
     var isAsync: Bool {
-        signature.effectSpecifiers?.asyncSpecifier != nil
+        signature.effectSpecifiers?.asyncSpecifier?.tokenKind == .keyword(.async)
     }
 
     var parameters: [FunctionParameterSyntax] {

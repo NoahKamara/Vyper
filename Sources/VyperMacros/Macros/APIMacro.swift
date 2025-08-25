@@ -8,8 +8,8 @@ import SwiftSyntax
 import SwiftSyntaxMacros
 import VyperCore
 
-public struct APIMacro: ExtensionMacro {
-    public static func expansion(
+struct APIMacro: ExtensionMacro {
+    static func expansion(
         of node: AttributeSyntax,
         attachedTo declaration: some DeclGroupSyntax,
         providingExtensionsOf type: some TypeSyntaxProtocol,

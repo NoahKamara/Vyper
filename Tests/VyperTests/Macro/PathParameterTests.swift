@@ -8,7 +8,7 @@ import MacroTesting
 import Testing
 @testable import VyperMacros
 
-@Suite("Path Parameter", .macros([APIMacro.self]), .tags(.macro))
+@Suite("APIMacro: Path Parameter", .macros([APIMacro.self]), .tags(.macro))
 struct PathParameterTests {
     @Test
     func optionalParameter() {

@@ -4,7 +4,6 @@
 //  Copyright © 2024 Noah Kamara.
 //
 
-import SwiftDiagnostics
 import SwiftSyntax
 import SwiftSyntaxMacros
 import VyperCore

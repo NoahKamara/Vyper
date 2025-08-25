@@ -9,7 +9,7 @@ import MacroTesting
 import Testing
 @testable import VyperMacros
 
-@Suite("Query Parameter", .macros([APIMacro.self]), .tags(.macro))
+@Suite("APIMacro: Query Parameter", .macros([APIMacro.self]), .tags(.macro))
 struct QueryParameterTests {
     @Test
     func base() {

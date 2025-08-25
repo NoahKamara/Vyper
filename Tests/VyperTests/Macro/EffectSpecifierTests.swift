@@ -14,7 +14,7 @@ extension Tag {
     @Tag static var macro: Self
 }
 
-@Suite("Effect Specifiers", .macros([APIMacro.self]), .tags(.macro))
+@Suite("APIMacro: Effect Specifiers", .macros([APIMacro.self]), .tags(.macro))
 struct EffectSpecifierTests {
     @Test
     func basic() {

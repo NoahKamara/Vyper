@@ -8,7 +8,7 @@ import MacroTesting
 import Testing
 @testable import VyperMacros
 
-@Suite("HTTPMethod Decorator", .macros([APIMacro.self]), .tags(.macro))
+@Suite("APIMacro: HTTPMethod Decorator", .macros([APIMacro.self]), .tags(.macro))
 struct HTTPMethodDecoratorTests {
     static let httpMethods = [
         "GET", "DELETE", "PATCH", "POST", "PUT", "OPTIONS", "HEAD", "TRACE", "CONNECT",

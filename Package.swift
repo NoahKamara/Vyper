@@ -59,20 +59,21 @@ let package = Package(
         ),
 
         // MARK: OpenAPI Plugin
-//        .plugin(
-//            name: "VyperOpenAPIPlugin",
-//            capability: .buildTool(),
-//            dependencies: ["VyperOpenAPITool"],
-//            path: "Sources/VyperOpenAPI/Plugin"
-//        ),
-//        .executableTarget(
-//            name: "VyperOpenAPITool",
-//            dependencies: ["VyperOpenAPI"],
-//            path: "Sources/VyperOpenAPI/Tool"
-//        ),
+        .plugin(
+            name: "VyperOpenAPIPlugin",
+            capability: .buildTool(),
+            dependencies: ["VyperOpenAPITool"],
+            path: "Sources/VyperOpenAPI/Plugin"
+        ),
+        .executableTarget(
+            name: "VyperOpenAPITool",
+            dependencies: ["VyperOpenAPI"],
+            path: "Sources/VyperOpenAPI/Tool"
+        ),
         .target(
             name: "VyperOpenAPI",
             dependencies: [
+                "VyperCore",
                 .product(name: "SymbolKit", package: "swift-docc-symbolkit"),
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
                 .product(name: "SwiftParser", package: "swift-syntax"),

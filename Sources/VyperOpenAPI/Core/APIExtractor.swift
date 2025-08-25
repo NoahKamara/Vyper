@@ -7,30 +7,16 @@
 
 import SwiftParser
 import SwiftSyntax
+import VyperCore
 
-package struct Route {
+package struct RouteDescriptor {
+    let route: APIRoute
     let markup: DocumentationMarkup
-}
-
-struct FunctionSignature {
-    let name: String
-    let parameters: [Parameter]
-
-    struct Parameter {
-        let name: String
-        let type: String
-        let kind: Kind
-
-        enum Kind {
-            case path
-            case query
-        }
-    }
 }
 
 /// Extracts routes from Swift source code
 package struct RouteExtractor {
-    private(set) var docs: [String: [String: Route]] = [:]
+    private(set) var docs: [String: [String: RouteDescriptor]] = [:]
 
     public init() {}
 
@@ -41,39 +27,43 @@ package struct RouteExtractor {
 
         docs.merge(visitor.docs) { old, new in
             print("Unhandled duplicate symbol \(old) \(new)")
-
             fatalError("Unhandled duplicate symbol")
         }
     }
 }
 
+
+
 private final class RouteCollectingVisitor: SyntaxVisitor {
     /// [API-Identifier: [method-name: documentation]]
-    var docs: [String: [String: Route]] = [:]
+    var docs: [String: [String: RouteDescriptor]] = [:]
 
     private var isParsingAPIDeclaration: Bool = false
     private var isInRouteDeclaration: Bool = false
 
     override func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
-        return processTypeDeclaration(node)
+        processTypeDeclaration(node)
+        return .visitChildren
     }
 
     override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
-        return processTypeDeclaration(node)
+        processTypeDeclaration(node)
+        return .visitChildren
     }
 
     override func visit(_ node: EnumDeclSyntax) -> SyntaxVisitorContinueKind {
-        return processTypeDeclaration(node)
+        processTypeDeclaration(node)
+        return .visitChildren
     }
 
-    private func processTypeDeclaration(_ node: any DeclSyntaxProtocol) -> SyntaxVisitorContinueKind {
+    private func processTypeDeclaration(_ node: any DeclSyntaxProtocol) {
         // Cast to WithAttributesSyntax to access attributes
         guard let attributedNode = node as? WithAttributesSyntax else {
-            return .visitChildren
+            return
         }
 
         guard attributedNode.attributes.first(named: "API") != nil else {
-            return .visitChildren
+            return
         }
 
         isParsingAPIDeclaration = true
@@ -91,7 +81,7 @@ private final class RouteCollectingVisitor: SyntaxVisitor {
         }
 
         guard let memberBlock else {
-            return .visitChildren
+            return
         }
 
         for member in memberBlock.members {
@@ -99,33 +89,16 @@ private final class RouteCollectingVisitor: SyntaxVisitor {
                 continue
             }
 
-            guard let routeAttribute = function.attributes.first(named: [
-                "HTTP", "GET", "DELETE", "PATCH", "POST", "PUT", "OPTIONS", "HEAD", "TRACE", "CONNECT",
-            ]) else {
+            let route: APIRoute?
+            do {
+                route = try APIParser.parseFunction(function)
+            } catch {
+                print("Error parsing method", error)
+                return
+            }
+
+            guard let route else {
                 continue
-            }
-
-            // Handle different types of route attributes
-            let routePath: String
-            if routeAttribute.attributeName.trimmedDescription == "HTTP" {
-                // @HTTP attribute should have arguments
-                guard case let .argumentList(arguments) = routeAttribute.arguments else {
-                    continue
-                }
-                routePath = arguments.dropFirst().map(\.trimmedDescription).joined(separator: ", ")
-            } else {
-                // Other HTTP method attributes (@GET, @POST, etc.) don't have arguments
-                // Use the attribute name as the route path
-                routePath = routeAttribute.attributeName.trimmedDescription
-            }
-
-            let documentationString = function.leadingTrivia.reduce(into: "") { result, piece in
-                if case let .docLineComment(string) = piece {
-                    if !result.isEmpty {
-                        result += "\n"
-                    }
-                    result += string.trimmingPrefix("/// ")
-                }
             }
 
             // get the qualified name of the method
@@ -143,6 +116,16 @@ private final class RouteCollectingVisitor: SyntaxVisitor {
             // API identifier is the type name (first component)
             let apiIdentifier = String(components[0])
 
+            
+
+            let documentationString = function.leadingTrivia.reduce(into: "") { result, piece in
+                if case let .docLineComment(string) = piece {
+                    if !result.isEmpty {
+                        result += "\n"
+                    }
+                    result += string.trimmingPrefix("/// ")
+                }
+            }
             let markup = DocumentationMarkup(text: documentationString)
 
             // Initialize the method dictionary if it doesn't exist
@@ -151,9 +134,9 @@ private final class RouteCollectingVisitor: SyntaxVisitor {
             }
 
             // Store the documentation for this method
-            docs[apiIdentifier]?[routePath] = Route(markup: markup)
+            docs[apiIdentifier]?[route.name] = RouteDescriptor(route: route, markup: markup)
         }
 
-        return .visitChildren
+        return
     }
 }

@@ -31,12 +31,16 @@ public struct API {
     }
 }
 
-public struct APIRoute {
-    public struct Parameter {
+public struct APIRoute: Equatable, CustomStringConvertible {
+    public struct Parameter: Equatable, CustomStringConvertible {
         public let name: String
         public let type: String
         public let isOptional: Bool
         public let kind: Kind
+
+        public var description: String {
+            "\(name): \(type)\(isOptional ? "?" : "") (\(kind))"
+        }
 
         package init(name: String, type: String, isOptional: Bool, kind: Kind) {
             self.name = name
@@ -45,7 +49,7 @@ public struct APIRoute {
             self.kind = kind
         }
 
-        public enum Kind {
+        public enum Kind: Sendable {
             case path
             case header
             case query
@@ -60,6 +64,20 @@ public struct APIRoute {
     public let parameters: [Parameter]
     public let isThrowing: Bool
     public let isAsync: Bool
+
+    public var description: String {
+        """
+        APIRoute(
+          name: '\(name)'
+          method: '\(method.trimmedDescription)'
+          path: \(path.map({ $0.trimmedDescription }).joined(separator: ", "))
+          isThrowing: '\(isThrowing)'
+          isAsync: '\(isAsync)'
+          parameters: 
+            \(parameters.map({ "- "+$0.description }).joined(separator: "\n    "))
+        )
+        """
+    }
 
     package init(
         name: String,
@@ -77,3 +95,4 @@ public struct APIRoute {
         self.isAsync = isAsync
     }
 }
+

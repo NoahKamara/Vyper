@@ -102,7 +102,7 @@ enum APIBuilder {
         .with(\.trailingClosure, closure)
     }
 
-    static func buildParameterExpression(_ parameter: APIRoute
+    private static func buildParameterExpression(_ parameter: APIRoute
         .Parameter
     ) throws -> VariableDeclSyntax {
         let initializerExpression: ExprSyntax = switch parameter.kind {
