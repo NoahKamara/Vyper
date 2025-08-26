@@ -7,20 +7,20 @@
 import SwiftDiagnostics
 import SwiftSyntax
 
-package enum APIParser {
-    package struct ParsingError: Error, CustomStringConvertible {
-        package let message: String
+enum APIParser {
+    struct ParsingError: Error, CustomStringConvertible {
+        let message: String
 
         init(_ message: String) {
             self.message = message
         }
 
-        package var description: String {
+        var description: String {
             self.message
         }
     }
 
-    package static func parse(_ declaration: some DeclSyntaxProtocol) throws -> API {
+    static func parse(_ declaration: some DeclSyntaxProtocol) throws -> API {
         guard let structDecl = declaration.as(StructDeclSyntax.self) else {
             throw ParsingError("APIs must be structs for now")
         }
@@ -31,7 +31,7 @@ package enum APIParser {
         )
     }
 
-    package static func parseFunction(_ function: FunctionDeclSyntax) throws -> APIRoute? {
+    static func parseFunction(_ function: FunctionDeclSyntax) throws -> APIRoute? {
         var method: ExprSyntax? = nil
         var path: [ExprSyntax] = []
 
@@ -64,13 +64,25 @@ package enum APIParser {
             return nil
         }
 
+        let documentationString = function.leadingTrivia.reduce(into: "") { result, piece in
+            if case .docLineComment(let string) = piece {
+                if !result.isEmpty {
+                    result += "\n"
+                }
+                result += string.trimmingPrefix("/// ")
+            }
+        }
+
+        let documentationMarkup = DocumentationMarkup(text: documentationString)
+
         return try .init(
             name: function.name.text,
             method: method,
             path: path,
-            parameters: function.parameters.map { try self.parseRouteParameter($0) },
             isThrowing: function.isThrowing,
-            isAsync: function.isAsync
+            isAsync: function.isAsync,
+            parameters: function.parameters.map { try self.parseRouteParameter($0) },
+            markup: documentationMarkup
         )
     }
 

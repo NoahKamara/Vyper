@@ -6,7 +6,6 @@
 
 import SwiftSyntax
 import SwiftSyntaxMacros
-import VyperCore
 
 struct DecoratorMacro: PeerMacro {
     static func expansion(

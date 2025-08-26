@@ -7,7 +7,7 @@
 
 import Testing
 import InlineSnapshotTesting
-@testable import VyperCore
+@testable import VyperMacros
 import SwiftParser
 import SwiftSyntax
 

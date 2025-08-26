@@ -6,7 +6,7 @@
 
 import SwiftSyntax
 
-public struct API {
+struct API {
 //        /// Attributes to be applied to this endpoint. These take precedence
 //        /// over attributes at the API scope.
 //        let attributes: [EndpointAttribute]
@@ -22,8 +22,8 @@ public struct API {
 //    /// Attributes to be applied to every endpoint of this API.
     ////    let attributes: [EndpointAttribute]
 //
-    public var name: String
-    public let routes: [APIRoute]
+    var name: String
+    let routes: [APIRoute]
 
     package init(name: String, routes: [APIRoute]) {
         self.name = name
@@ -31,14 +31,14 @@ public struct API {
     }
 }
 
-public struct APIRoute: Equatable, CustomStringConvertible {
-    public struct Parameter: Equatable, CustomStringConvertible {
-        public let name: String
-        public let type: String
-        public let isOptional: Bool
-        public let kind: Kind
+struct APIRoute: CustomStringConvertible {
+    struct Parameter: CustomStringConvertible {
+        let name: String
+        let type: String
+        let isOptional: Bool
+        let kind: Kind
 
-        public var description: String {
+        var description: String {
             "\(name): \(type)\(isOptional ? "?" : "") (\(kind))"
         }
 
@@ -49,7 +49,7 @@ public struct APIRoute: Equatable, CustomStringConvertible {
             self.kind = kind
         }
 
-        public enum Kind: Sendable {
+        enum Kind: Sendable {
             case path
             case header
             case query
@@ -58,14 +58,15 @@ public struct APIRoute: Equatable, CustomStringConvertible {
         }
     }
 
-    public let name: String
-    public let method: ExprSyntax
-    public let path: [ExprSyntax]
-    public let parameters: [Parameter]
-    public let isThrowing: Bool
-    public let isAsync: Bool
+    let name: String
+    let method: ExprSyntax
+    let path: [ExprSyntax]
+    let isThrowing: Bool
+    let isAsync: Bool
+    let parameters: [Parameter]
+    let markup: DocumentationMarkup
 
-    public var description: String {
+    var description: String {
         """
         APIRoute(
           name: '\(name)'
@@ -79,20 +80,22 @@ public struct APIRoute: Equatable, CustomStringConvertible {
         """
     }
 
-    package init(
+    init(
         name: String,
         method: ExprSyntax,
         path: [ExprSyntax],
-        parameters: [APIRoute.Parameter],
         isThrowing: Bool,
-        isAsync: Bool
+        isAsync: Bool,
+        parameters: [APIRoute.Parameter],
+        markup: DocumentationMarkup
     ) {
         self.name = name
         self.method = method
         self.path = path
-        self.parameters = parameters
         self.isThrowing = isThrowing
         self.isAsync = isAsync
+        self.parameters = parameters
+        self.markup = markup
     }
 }
 

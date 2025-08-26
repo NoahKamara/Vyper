@@ -7,7 +7,6 @@
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
-import VyperCore
 
 enum APIBuilder {
     static func build(
@@ -43,9 +42,11 @@ enum APIBuilder {
             memberBlock: .init(members: .init([.init(decl: bootstrapFunction)]))
         )
     }
+}
 
+fileprivate extension APIBuilder {
     private static func buildRoute(_ route: APIRoute) throws -> FunctionCallExprSyntax {
-        let parameterBuilders = try route.parameters.map { try self.buildParameterExpression($0) }
+        let parameterBuilders = try route.parameters.map { try self.buildRouteParameterDecoder($0) }
 
         var routeFunctionCall: any ExprSyntaxProtocol = FunctionCallExprSyntax(
             calledExpression: MemberAccessExprSyntax(
@@ -56,12 +57,12 @@ enum APIBuilder {
             rightParen: .rightParenToken(),
             argumentsBuilder: {
                 route.parameters.map { parameter in
-                    .init(
-                        label: parameter.name,
-                        expression: DeclReferenceExprSyntax(
-                            baseName: .identifier(parameter.name)
+                        .init(
+                            label: parameter.name,
+                            expression: DeclReferenceExprSyntax(
+                                baseName: .identifier(parameter.name)
+                            )
                         )
-                    )
                 }
             }
         )
@@ -102,8 +103,8 @@ enum APIBuilder {
         .with(\.trailingClosure, closure)
     }
 
-    private static func buildParameterExpression(_ parameter: APIRoute
-        .Parameter
+    private static func buildRouteParameterDecoder(
+        _ parameter: APIRoute.Parameter
     ) throws -> VariableDeclSyntax {
         let initializerExpression: ExprSyntax = switch parameter.kind {
         case .path:

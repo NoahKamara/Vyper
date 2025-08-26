@@ -10,7 +10,7 @@
 import Foundation
 //import Markdown
 import SymbolKit
-@testable import VyperOpenAPI
+@testable import VyperMacros
 
 extension DocumentationMarkup: Encodable {
     private enum CodingKeys: String, CodingKey {

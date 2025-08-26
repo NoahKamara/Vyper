@@ -1,5 +1,5 @@
 {
-  "originHash" : "861fe15eb4769d227626c540e5e35ff6d683aa54bbc898cd5c25f92ba693cfc7",
+  "originHash" : "4d160f9296f7ed41197009402d3e9083688352cbc6393432f4b88425f942c602",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -296,6 +296,15 @@
       "state" : {
         "revision" : "890830fff1a577dc83134890c7984020c5f6b43b",
         "version" : "1.6.2"
+      }
+    },
+    {
+      "identity" : "swiftopenapi",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/dankinsoid/SwiftOpenAPI",
+      "state" : {
+        "revision" : "c2752c9f51b585524c96e012d326e7f04c9882db",
+        "version" : "2.24.1"
       }
     },
     {

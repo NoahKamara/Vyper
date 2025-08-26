@@ -6,7 +6,6 @@
 
 import SwiftSyntax
 import SwiftSyntaxMacros
-import VyperCore
 
 struct APIMacro: ExtensionMacro {
     static func expansion(

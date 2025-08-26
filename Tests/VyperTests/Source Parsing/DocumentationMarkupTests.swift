@@ -8,7 +8,7 @@
 
 import Testing
 import InlineSnapshotTesting
-@testable import VyperOpenAPI
+@testable import VyperMacros
 
 extension Tag {
     @Tag static var syntax: Self

@@ -57,8 +57,10 @@ struct TaggedComponents: MarkupRewriter {
 
     mutating func visitDocument(_ document: Document) -> (any Markup)? {
         // First, visit all markup to extract tags
-        let processedDocument = Document(document.children.compactMap { visit($0) as? (any BlockMarkup) })
-        
+        let processedDocument = Document(document.children
+            .compactMap { visit($0) as? (any BlockMarkup) }
+        )
+
         // Then, rewrite top level "- Note:" list elements to Note Aside elements
         var result = [any Markup]()
 
