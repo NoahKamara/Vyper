@@ -49,7 +49,7 @@ struct APIRoute: CustomStringConvertible {
             self.kind = kind
         }
 
-        enum Kind: Sendable {
+        enum Kind: String, Sendable {
             case path
             case header
             case query

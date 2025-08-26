@@ -17,4 +17,8 @@ public struct DiscussionSection {
     public init(content: [any Markup]) {
         self.content = content
     }
+
+    public func format() -> String {
+        content.map({ $0.format() }).joined(separator: "\n\n")
+    }
 }

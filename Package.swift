@@ -1,4 +1,4 @@
-// swift-tools-version: 6.1
+// swift-tools-version: 6.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import CompilerPluginSupport
@@ -6,7 +6,7 @@ import PackageDescription
 
 let package = Package(
     name: "Vyper",
-    platforms: [.macOS(.v13), .iOS(.v13), .tvOS(.v13), .watchOS(.v6), .macCatalyst(.v13)],
+    platforms: [.macOS(.v15), .iOS(.v13), .tvOS(.v13), .watchOS(.v6), .macCatalyst(.v13)],
     products: [
         .library(
             name: "Vyper",
@@ -25,11 +25,13 @@ let package = Package(
         .package(url: "https://github.com/pointfreeco/swift-macro-testing", from: "0.6.3"),
         .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", from: "1.18.6"),
         .package(url: "https://github.com/dankinsoid/SwiftOpenAPI", from: "2.24.1"),
+        .package(path: "../../../VaporToOpenAPI"),
     ],
     targets: [
         .target(
             name: "Vyper",
             dependencies: [
+                "VaporToOpenAPI",
                 "VyperMacros",
                 .product(name: "Vapor", package: "vapor"),
             ]
