@@ -65,6 +65,7 @@ struct APIRoute: CustomStringConvertible {
     let isAsync: Bool
     let parameters: [Parameter]
     let markup: DocumentationMarkup
+    let returnType: String?
 
     var description: String {
         """
@@ -76,6 +77,7 @@ struct APIRoute: CustomStringConvertible {
           isAsync: '\(isAsync)'
           parameters: 
             \(parameters.map({ "- "+$0.description }).joined(separator: "\n    "))
+          returnType: '\(returnType ?? "Void")'
         )
         """
     }
@@ -87,7 +89,8 @@ struct APIRoute: CustomStringConvertible {
         isThrowing: Bool,
         isAsync: Bool,
         parameters: [APIRoute.Parameter],
-        markup: DocumentationMarkup
+        markup: DocumentationMarkup,
+        returnType: String?
     ) {
         self.name = name
         self.method = method
@@ -96,6 +99,7 @@ struct APIRoute: CustomStringConvertible {
         self.isAsync = isAsync
         self.parameters = parameters
         self.markup = markup
+        self.returnType = returnType
     }
 }
 

@@ -11,12 +11,13 @@ import SwiftSyntaxMacros
 enum APIBuilder {
     static func build(
         api: API,
-        extendedType: some TypeSyntaxProtocol
+        extendedType: some TypeSyntaxProtocol,
+        options: APIOptions
     ) throws -> ExtensionDeclSyntax {
         let routeBuilderStatements = try CodeBlockItemListSyntax(
             api.routes.map { route in
                 try CodeBlockItemSyntax(
-                    item: .init(self.buildRoute(route))
+                    item: .init(self.buildRoute(route, options: options))
                 )
             }
         )
@@ -29,7 +30,7 @@ enum APIBuilder {
                         .init(
                             firstName: "routes",
                             type: IdentifierTypeSyntax(name: "RoutesBuilder")
-                        )
+                        ),
                     ]
                 ),
                 effectSpecifiers: .init(throwsClause: .init(throwsSpecifier: .keyword(.throws)))
@@ -43,7 +44,10 @@ enum APIBuilder {
         )
     }
 
-    private static func buildRoute(_ route: APIRoute) throws -> FunctionCallExprSyntax {
+    private static func buildRoute(
+        _ route: APIRoute,
+        options: APIOptions
+    ) throws -> FunctionCallExprSyntax {
         let parameterBuilders = try route.parameters.map { try self.buildRouteParameterDecoder($0) }
 
         var routeFunctionCall: any ExprSyntaxProtocol = FunctionCallExprSyntax(
@@ -109,6 +113,11 @@ enum APIBuilder {
             nil
         }
 
+        // dont generate openapi calls when docs disabled
+        guard !options.excludeFromDocs else {
+            return funcCall
+        }
+
         // Build base spec .openAPI()
         if abstract != nil || discussion != nil {
             // Add OpenAPI modifier
@@ -138,16 +147,16 @@ enum APIBuilder {
             )
         }
 
-        // Add additional .openAPI(custom: \.parameters, [...]) for parameter specifications
+        // Parameters .openAPI(custom: \.parameters, [...])
         if !route.parameters.isEmpty {
-            let parameterObjects = try route.parameters.map { parameter in
+            let parameterObjects = route.parameters.map { parameter in
                 let parameterMarkup = route.markup.discussionTags?.parameters
                     .first(where: { $0.name == parameter.name })?
                     .contents
-                    .map({ $0.format() })
+                    .map { $0.format() }
                     .joined(separator: "\n")
 
-                return try self.buildParameterObject(
+                return self.buildParameterObject(
                     parameter: parameter,
                     markup: parameterMarkup
                 )
@@ -155,9 +164,27 @@ enum APIBuilder {
 
             funcCall = funcCall.openAPI(
                 keyPath: "parameters",
-                ArrayExprSyntax(elementsBuilder: {
-                    parameterObjects.map({ .init(expression: $0) })
-                })
+                ArrayExprSyntax(
+                    elementsBuilder: {
+                        parameterObjects
+                            .map { parameterObject in
+                                ArrayElementSyntax(
+                                    expression: FunctionCallExprSyntax.dotCall(
+                                        "value",
+                                        argumentList: { .init(expression: parameterObject) }
+                                    )
+                                )
+                            }
+                    })
+            )
+        }
+
+        // Return type .openAPI(custom: \.responses, [...])
+        if let returnType = route.returnType {
+            funcCall = callResponse(
+                route: funcCall,
+                returnType: returnType,
+                markup: route.markup.discussionTags?.returns.first?.format()
             )
         }
 
@@ -167,12 +194,13 @@ enum APIBuilder {
     private static func buildParameterObject(
         parameter: APIRoute.Parameter,
         markup: String?
-    ) throws -> FunctionCallExprSyntax {
-        let schemaType = self.getOpenAPISchemaType(for: parameter)
+    ) -> FunctionCallExprSyntax {
+        let schemaType = self.getOpenAPISchemaType(for: parameter.type)
 
         return FunctionCallExprSyntax(
-            callee: DeclReferenceExprSyntax(
-                baseName: .identifier("ParameterObject")
+            callee: MemberAccessExprSyntax(
+                period: .periodToken(),
+                declName: DeclReferenceExprSyntax(baseName: .identifier("init"))
             ),
             argumentList: {
                 LabeledExprSyntax(
@@ -204,6 +232,56 @@ enum APIBuilder {
             }
         )
     }
+
+    private static func callResponse(
+        route: FunctionCallExprSyntax,
+        returnType: String,
+        markup: String?
+    ) -> FunctionCallExprSyntax {
+        let schemaType = self.getOpenAPISchemaType(for: returnType)
+
+        return route.call("response") {
+            LabeledExprSyntax(
+                label: "body",
+                expression: FunctionCallExprSyntax(
+                    callee: MemberAccessExprSyntax(
+                        period: .periodToken(),
+                        name: .identifier("type")
+                    ),
+                    argumentList: {
+                        LabeledExprSyntax(expression: MemberAccessExprSyntax(
+                            base: DeclReferenceExprSyntax(baseName: .identifier(returnType)),
+                            period: .periodToken(),
+                            name: .keyword(.self)
+                        ))
+                    }
+                )
+            )
+
+            LabeledExprSyntax(
+                label: "contentType",
+                expression: FunctionCallExprSyntax(
+                    callee: MemberAccessExprSyntax(
+                        period: .periodToken(),
+                        name: .identifier("application")
+                    ),
+                    argumentList: {
+                        LabeledExprSyntax(
+                            expression: MemberAccessExprSyntax(period: .periodToken(), name: .identifier("json"))
+                        )
+                    }
+                )
+            )
+//            .response(
+//                statusCode: <#T##ResponsesObject.Key#>,
+//                body: <#T##OpenAPIBody?#>,
+//                contentType: <#T##MediaType...##MediaType#>,
+//                headers: <#T##OpenAPIParameters?#>,
+//                description: <#T##String?#>
+//            )
+        }
+    }
+
     private static func getOpenAPISchemaType(for kind: APIRoute.Parameter.Kind)
         -> FunctionCallExprSyntax
     {
@@ -211,23 +289,22 @@ enum APIBuilder {
         // You can enhance this to map Swift types to OpenAPI schemas
         FunctionCallExprSyntax(
             callee: MemberAccessExprSyntax(
-                base: DeclReferenceExprSyntax(baseName: .identifier("SchemaObject")),
+                period: .periodToken(),
                 name: .identifier("string")
             ),
             argumentList: {}
         )
     }
 
-    private static func getOpenAPISchemaType(for parameter: APIRoute.Parameter)
-        -> FunctionCallExprSyntax
-    {
+    private static func getOpenAPISchemaType(
+        for typeIdentifier: String
+    ) -> FunctionCallExprSyntax {
         // Map Swift types to OpenAPI schema types
-        let schemaType =
-            switch parameter.type {
+        let schemaType = switch typeIdentifier {
             case "String", "String?":
                 "string"
             case "Int", "Int8", "Int16", "Int32", "Int64", "Int?", "Int8?", "Int16?", "Int32?",
-                "Int64?":
+                 "Int64?":
                 "integer"
             case "Float", "Double", "Float?", "Double?":
                 "number"
@@ -239,19 +316,19 @@ enum APIBuilder {
                 "array"
             case let type where self.isCustomType(type):
                 // For custom types, reference them in the components/schemas section
-                "object"  // or reference the custom schema
+                "object" // or reference the custom schema
             default:
                 "object"
             }
 
         // For custom types, we need to handle them differently
-        if self.isCustomType(parameter.type) {
-            return self.buildCustomTypeSchema(for: parameter.type)
+        if self.isCustomType(typeIdentifier) {
+            return self.buildCustomTypeSchema(for: typeIdentifier)
         }
 
         return FunctionCallExprSyntax(
             calledExpression: MemberAccessExprSyntax(
-                base: DeclReferenceExprSyntax(baseName: .identifier("SchemaObject")),
+                period: .periodToken(),
                 name: .identifier(schemaType)
             ),
             argumentsBuilder: {}
@@ -283,14 +360,9 @@ enum APIBuilder {
         // 2. Generate inline schema (for simple cases)
 
         // Option 1: Reference to components/schemas (recommended for complex types)
-        return FunctionCallExprSyntax(
-            calledExpression: MemberAccessExprSyntax(
-                base: DeclReferenceExprSyntax(baseName: .identifier("ReferenceOr")),
-                name: .identifier("schema")
-            )
-        ) {
+        return FunctionCallExprSyntax.dotCall("schema") {
             LabeledExprSyntax(
-                expression: FunctionCallExprSyntax(
+                expression: FunctionCallExprSyntax.dotCall(<#T##declName: String##String#>, argumentList: <#T##() -> LabeledExprListSyntax#>)(
                     calledExpression: DeclReferenceExprSyntax(
                         baseName: .identifier("SchemaObject")
                     ),
@@ -300,7 +372,7 @@ enum APIBuilder {
                             expression: StringLiteralExprSyntax(
                                 content: "#/components/schemas/\(cleanType)"
                             )
-                        )
+                        ),
                     ]
                 )
             )
@@ -377,25 +449,45 @@ enum APIBuilder {
 }
 
 extension FunctionCallExprSyntax {
+    static func dotCall(
+        _ declName: String,
+        @LabeledExprListBuilder argumentList: () -> LabeledExprListSyntax = { [] }
+    ) -> FunctionCallExprSyntax {
+        FunctionCallExprSyntax(
+            callee: MemberAccessExprSyntax(
+                period: .periodToken(leadingTrivia: .newline),
+                declName: .init(baseName: .identifier(declName))
+            ),
+            argumentList: argumentList
+        )
+    }
+
+    func call(
+        _ declName: String,
+        @LabeledExprListBuilder argumentList: () -> LabeledExprListSyntax = { [] }
+    ) -> FunctionCallExprSyntax {
+        FunctionCallExprSyntax(
+            callee: MemberAccessExprSyntax(
+                base: self,
+                period: .periodToken(leadingTrivia: .newline),
+                declName: .init(baseName: .identifier(declName))
+            ),
+            argumentList: argumentList
+        )
+    }
+
     func openAPI(keyPath: String, _ value: some ExprSyntaxProtocol) -> FunctionCallExprSyntax {
         let keyPathExpr = KeyPathExprSyntax(components: [
             .init(
                 period: .periodToken(),
                 component: .property(.init(declName: .init(baseName: .identifier(keyPath))))
-            )
+            ),
         ])
 
-        return FunctionCallExprSyntax(
-            callee: MemberAccessExprSyntax(
-                base: self,
-                period: .periodToken(leadingTrivia: .newline),
-                declName: .init(baseName: .identifier("openAPI"))
-            ),
-            argumentList: {
-                LabeledExprSyntax(label: "custom", colon: .colonToken(), expression: keyPathExpr)
-                LabeledExprSyntax(expression: value)
-            }
-        )
+        return self.call("openAPI") {
+            LabeledExprSyntax(label: "custom", colon: .colonToken(), expression: keyPathExpr)
+            LabeledExprSyntax(expression: value)
+        }
     }
 }
 

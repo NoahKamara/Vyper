@@ -14,7 +14,7 @@ struct PathParameterTests {
     func optionalParameter() {
         assertMacro {
             """
-            @API
+            @API(.excludeFromDocs)
             struct TestController {
                 @GET(":foo", ":bar")
                 func list(@Path foo: String?, @Path bar: Int?) -> Response {
@@ -48,7 +48,7 @@ struct PathParameterTests {
     func requiredParameter() {
         assertMacro {
             """
-            @API
+            @API(.excludeFromDocs)
             struct TestController {
                 @GET(":foo", ":bar")
                 func list(@Path foo: String) -> Response {
@@ -81,7 +81,7 @@ struct PathParameterTests {
     func convertibleParameter() {
         assertMacro {
             """
-            @API
+            @API(.excludeFromDocs)
             struct TestController {
                 @GET(":foo", ":bar")
                 func list(@Path foo: Int) -> Response {

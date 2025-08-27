@@ -82,8 +82,22 @@ enum APIParser {
             isThrowing: function.isThrowing,
             isAsync: function.isAsync,
             parameters: function.parameters.map { try self.parseRouteParameter($0) },
-            markup: documentationMarkup
+            markup: documentationMarkup,
+            returnType: self.parseReturnValue(function.signature.returnClause)
         )
+    }
+
+    private static func parseReturnValue(_ result: ReturnClauseSyntax?) -> String? {
+        guard let result else { return nil }
+
+        let returnType = result.type.trimmedDescription
+
+        // Handle Void return type or any Response
+        if returnType == "Void" || returnType == "()" || returnType == "Response" {
+            return nil
+        }
+
+        return returnType
     }
 
     private static func parseRouteParameter(

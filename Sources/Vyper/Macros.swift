@@ -46,6 +46,11 @@ public macro API(_ typeName: String? = nil) = #externalMacro(
 // MARK: HTTP Routes
 
 @attached(peer)
+public macro Schema(
+    exclude: Bool? = nil
+) = #externalMacro(module: "VyperMacros", type: "DecoratorMacro")
+
+@attached(peer)
 public macro HTTP(
     _ method: HTTPMethod,
     _ path: PathComponent...

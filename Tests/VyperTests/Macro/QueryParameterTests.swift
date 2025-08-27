@@ -15,7 +15,7 @@ struct QueryParameterTests {
     func base() {
         assertMacro {
             """
-            @API
+            @API(.excludeFromDocs)
             struct TestController {
                 @GET(":foo", ":bar")
                 func list(@Query foo: String, @Query bar baz: Int) -> Response {
@@ -49,7 +49,7 @@ struct QueryParameterTests {
     func optionalParameter() {
         assertMacro {
             """
-            @API
+            @API(.excludeFromDocs)
             struct TestController {
                 @GET(":foo", ":bar")
                 func list(@Query foo: String?, @Query bar: Int?) -> Response {
@@ -83,7 +83,7 @@ struct QueryParameterTests {
     func requiredParameter() {
         assertMacro {
             """
-            @API
+            @API(.excludeFromDocs)
             struct TestController {
                 @GET(":foo", ":bar")
                 func list(@Query foo: String) -> Response {
@@ -116,7 +116,7 @@ struct QueryParameterTests {
     func convertibleParameter() {
         assertMacro {
             """
-            @API
+            @API(.excludeFromDocs)
             struct TestController {
                 @GET(":foo", ":bar")
                 func list(@Query foo: Int) -> Response {

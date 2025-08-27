@@ -7,6 +7,8 @@
 import Vapor
 import VaporToOpenAPI
 import Vyper
+
+
 //
 //actor TodoStore: GlobalActor {
 //    static let shared = TodoStore()
@@ -108,15 +110,51 @@ import Vyper
 //        return await store.allTodos()
 //    }
 //}
-
-// @API
-// struct TestController {
-//    let store = TodoStore()
+//Route().openAPI(custom: \.responses, [
+//    .default: ReferenceOr<ResponseObject>.value(.init(
+//        description: <#T##String#>,
+//        headers: <#T##ComponentsMap<HeaderObject>?#>,
+//        content: <#T##ContentObject?#>,
+//        links: <#T##ComponentsMap<LinkObject>?#>
+//    ))
+//])
 //
-////    @HTTP(.GET, .anything)
-////    func list() async -> [TodoDto] {
-////        await self.store.allTodos()
-////    }
+//Route().response(body: <#T##OpenAPIBody?#>, contentType: <#T##MediaType...##MediaType#>)
+//    .openAPI(
+//        customMethod: <#T##PathItemObject.Method?#>,
+//        spec: <#T##String?#>,
+//        tags: <#T##TagObject...##TagObject#>,
+//        summary: <#T##String?#>,
+//        description: <#T##String#>,
+//        operationId: <#T##String?#>,
+//        externalDocs: <#T##ExternalDocumentationObject?#>,
+//        query: <#T##OpenAPIParameters?#>,
+//        headers: <#T##OpenAPIParameters?#>,
+//        path: <#T##OpenAPIParameters?#>,
+//        cookies: <#T##OpenAPIParameters?#>,
+//        body: <#T##OpenAPIBody?#>,
+//        contentType: <#T##MediaType...##MediaType#>,
+//        response: <#T##OpenAPIBody?#>,
+//        responseContentType: <#T##MediaType...##MediaType#>,
+//        responseHeaders: <#T##OpenAPIParameters?#>,
+//        responseDescription: <#T##String?#>,
+//        statusCode: <#T##ResponsesObject.Key#>,
+//        links: <#T##[Link : any LinkKey.Type]#>,
+//        callbacks: <#T##[String : ReferenceOr<CallbackObject>]?#>,
+//        deprecated: <#T##Bool?#>,
+//        auth: <#T##AuthSchemeObject...##AuthSchemeObject#>,
+//        servers: <#T##[ServerObject]?#>,
+//        extensions: <#T##SpecificationExtensions#>
+//    )
+
+//@API
+//struct TestController {
+////    let store = TodoStore()
+//
+//    //    @HTTP(.GET, .anything)
+//    //    func list() async -> [TodoDto] {
+//    //        await self.store.allTodos()
+//    //    }
 //
 //    @GET(":todoID")
 //    func retrieve(@Path todoID id: Int) async throws -> TodoDto {
@@ -127,6 +165,6 @@ import Vyper
 //        }
 //    }
 //
-////    @GET
-////    func index() -> [Todo]
-// }
+//    //    @GET
+//    //    func index() -> [Todo]
+//}

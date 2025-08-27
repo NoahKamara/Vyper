@@ -23,7 +23,7 @@ struct HTTPMethodDecoratorTests {
     func basicHTTP(method: String) {
         assertMacro {
             """
-            @API
+            @API(.excludeFromDocs)
             struct TestController {
                 @HTTP(.\(method))
                 func list() -> Response {
@@ -55,7 +55,7 @@ struct HTTPMethodDecoratorTests {
     func methodHelper(method: String) {
         assertMacro {
             """
-            @API
+            @API(.excludeFromDocs)
             struct TestController {
                 @\(method)
                 func list() -> Response {
@@ -87,7 +87,7 @@ struct HTTPMethodDecoratorTests {
     func path(path: String) {
         assertMacro {
             """
-            @API
+            @API(.excludeFromDocs)
             struct TestController {
                 @HTTP(.GET, \(path))
                 func list() -> Response {
@@ -119,7 +119,7 @@ struct HTTPMethodDecoratorTests {
     func methodHelperPath(path: String) {
         assertMacro {
             """
-            @API
+            @API(.excludeFromDocs)
             struct TestController {
                 @GET(\(path))
                 func list() -> Response {

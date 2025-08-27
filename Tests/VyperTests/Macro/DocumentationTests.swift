@@ -88,7 +88,7 @@ struct DocumentationTests {
                         let query: String = try request.query.get(at: "query")
                         return self.list(path: path, query: query)
                     }
-                    .openAPI(custom: \.parameters, [ParameterObject(name: "path", description: "path parameter.", in: .path, required: true, schema: SchemaObject.string), ParameterObject(name: "query", description: "query parameter.", in: .query, required: true, schema: SchemaObject.string)])
+                    .openAPI(custom: \.parameters, [.init(name: "path", description: "path parameter.", in: .path, required: true, schema: .string), .init(name: "query", description: "query parameter.", in: .query, required: true, schema: .string)])
                 }
             }
             """#

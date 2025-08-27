@@ -29,7 +29,7 @@ struct SearchFilters: Content {
 }
 
 // Your macro should parse these and generate appropriate OpenAPI schemas
-//@API
+@API
 struct CustomTypesController {
     let allTodos = [
         Todo(id: "1", title: "Procrastinate", isCompleted: true, createdAt: .distantPast),
@@ -41,17 +41,17 @@ struct CustomTypesController {
         return self.allTodos
     }
 
-    @GET(":todoId")
-    func retrieve(@Path todoId: String) throws -> Todo {
-        if let todo = allTodos.first(where: { $0.id == todoId }) {
-            todo
-        } else {
-            throw Abort(.notFound)
-        }
-    }
+//    @GET(":todoId")
+//    func retrieve(@Path todoId: String) throws -> Todo {
+//        if let todo = allTodos.first(where: { $0.id == todoId }) {
+//            todo
+//        } else {
+//            throw Abort(.notFound)
+//        }
+//    }
 
-    @GET("search")
-    func search(@Query filters: SearchFilters) async throws -> [Todo] {
-        allTodos.filter({ $0.title.localizedStandardContains(filters.query) })
-    }
+//    @GET("search")
+//    func search(@Query filters: SearchFilters) async throws -> [Todo] {
+//        allTodos.filter({ $0.title.localizedStandardContains(filters.query) })
+//    }
 }

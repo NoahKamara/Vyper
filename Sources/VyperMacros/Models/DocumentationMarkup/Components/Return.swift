@@ -33,4 +33,10 @@ public struct Return {
         self.contents = Array(doxygenReturns.children)
         self.range = doxygenReturns.range
     }
+
+    public func format() -> String {
+        contents.reduce(into: "") { partialResult, content in
+            partialResult += content.format()
+        }
+    }
 }
