@@ -25,7 +25,7 @@ let package = Package(
         .package(url: "https://github.com/pointfreeco/swift-macro-testing", from: "0.6.3"),
         .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", from: "1.18.6"),
         .package(url: "https://github.com/dankinsoid/SwiftOpenAPI", from: "2.24.1"),
-        .package(path: "../../../VaporToOpenAPI"),
+        .package(path: "../../VaporToOpenAPI"),
     ],
     targets: [
         .target(
@@ -40,7 +40,6 @@ let package = Package(
             name: "VyperMacros",
             dependencies: [
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
-                .product(name: "SwiftDiagnostics", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
                 .product(name: "SwiftDiagnostics", package: "swift-syntax"),
@@ -49,14 +48,6 @@ let package = Package(
                 .product(name: "Markdown", package: "swift-markdown"),
             ]
         ),
-//        .target(
-//            name: "VyperCore",
-//            dependencies: [
-//                .product(name: "Vapor", package: "vapor"),
-//                .product(name: "SwiftDiagnostics", package: "swift-syntax"),
-//                .product(name: "SwiftSyntax", package: "swift-syntax"),
-//            ]
-//        ),
         .executableTarget(
             name: "VyperClient",
             dependencies: [
@@ -64,32 +55,6 @@ let package = Package(
                 .product(name: "Vapor", package: "vapor"),
             ]
         ),
-
-        // MARK: OpenAPI Plugin
-//        .plugin(
-//            name: "VyperOpenAPIPlugin",
-//            capability: .buildTool(),
-//            dependencies: ["VyperOpenAPITool"],
-//            path: "Sources/VyperOpenAPI/Plugin"
-//        ),
-//        .executableTarget(
-//            name: "VyperOpenAPITool",
-//            dependencies: ["VyperOpenAPI"],
-//            path: "Sources/VyperOpenAPI/Tool"
-//        ),
-//        .target(
-//            name: "VyperOpenAPI",
-//            dependencies: [
-//                "VyperCore",
-//                .product(name: "SymbolKit", package: "swift-docc-symbolkit"),
-//                .product(name: "SwiftSyntax", package: "swift-syntax"),
-//                .product(name: "SwiftParser", package: "swift-syntax"),
-//                .product(name: "Markdown", package: "swift-markdown"),
-//            ],
-//            path: "Sources/VyperOpenAPI/Core"
-//        ),
-
-        // MARK: Testing
         .testTarget(
             name: "VyperTests",
             dependencies: [
