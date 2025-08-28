@@ -7,8 +7,8 @@
 import SwiftSyntax
 import SwiftSyntaxMacros
 
-struct APIMacro: ExtensionMacro {
-    static func expansion(
+package struct APIMacro: ExtensionMacro {
+    package static func expansion(
         of node: AttributeSyntax,
         attachedTo declaration: some DeclGroupSyntax,
         providingExtensionsOf type: some TypeSyntaxProtocol,
