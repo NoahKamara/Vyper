@@ -1,5 +1,5 @@
 //
-//  HTTPDecoratorTests.swift
+//  HTTPMethodDecoratorTests.swift
 //
 //  Copyright © 2024 Noah Kamara.
 //
@@ -23,7 +23,7 @@ struct HTTPMethodDecoratorTests {
     func basicHTTP(method: String) {
         assertMacro {
             """
-            @API(.excludeFromDocs)
+            @API(traits: .excludeFromDocs)
             struct TestController {
                 @HTTP(.\(method))
                 func list() -> Response {
@@ -55,7 +55,7 @@ struct HTTPMethodDecoratorTests {
     func methodHelper(method: String) {
         assertMacro {
             """
-            @API(.excludeFromDocs)
+            @API(traits: .excludeFromDocs)
             struct TestController {
                 @\(method)
                 func list() -> Response {
@@ -87,7 +87,7 @@ struct HTTPMethodDecoratorTests {
     func path(path: String) {
         assertMacro {
             """
-            @API(.excludeFromDocs)
+            @API(traits: .excludeFromDocs)
             struct TestController {
                 @HTTP(.GET, \(path))
                 func list() -> Response {
@@ -119,7 +119,7 @@ struct HTTPMethodDecoratorTests {
     func methodHelperPath(path: String) {
         assertMacro {
             """
-            @API(.excludeFromDocs)
+            @API(traits: .excludeFromDocs)
             struct TestController {
                 @GET(\(path))
                 func list() -> Response {

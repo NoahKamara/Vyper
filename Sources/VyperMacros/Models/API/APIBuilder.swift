@@ -42,7 +42,7 @@ enum APIBuilder {
             extendedType: extendedType,
             inheritanceClause: .init(
                 inheritedTypes: [
-                    .init(type: IdentifierTypeSyntax(name: .identifier("RouteCollection")))
+                    .init(type: IdentifierTypeSyntax(name: .identifier("RouteCollection"))),
                 ]
             ),
             memberBlock: .init(members: .init([.init(decl: bootstrapFunction)]))
@@ -96,8 +96,10 @@ enum APIBuilder {
             })
         )
 
-        // routes.on(.GET) {} call
+        // Combine API-level path with route-level path
+        let combinedPath = options.path + route.path
 
+        // routes.on(.GET) {} call
         var funcCall = FunctionCallExprSyntax(
             calledExpression: MemberAccessExprSyntax(
                 base: DeclReferenceExprSyntax(baseName: .identifier("routes")),
@@ -108,8 +110,18 @@ enum APIBuilder {
             rightParen: .rightParenToken()
         ) {
             LabeledExprSyntax(expression: route.method)
-            route.path.map { LabeledExprSyntax(expression: $0) }
+            combinedPath.map { LabeledExprSyntax(expression: $0) }
         }.with(\.trailingClosure, closure)
+
+        // Process traits
+        for trait in options.traits {
+            if let memberAccess = trait.as(MemberAccessExprSyntax.self),
+               memberAccess.declName.trimmedDescription == "ExcludeFromDocs"
+            {
+                // Skip OpenAPI generation for this route
+                return funcCall
+            }
+        }
 
         let abstract: String? = route.markup.abstractSection?.paragraph.format()
         let discussion: String? = if let discussion = route.markup.discussionSection {
@@ -187,13 +199,14 @@ enum APIBuilder {
                                     )
                                 )
                             }
-                    })
+                    }
+                )
             )
         }
 
         // Return type .openAPI(custom: \.responses, [...])
         if let returnType = route.returnType {
-            funcCall = callResponse(
+            funcCall = self.callResponse(
                 route: funcCall,
                 returnType: returnType,
                 markup: route.markup.discussionTags?.returns.first?.format()
@@ -279,7 +292,10 @@ enum APIBuilder {
                     ),
                     argumentList: {
                         LabeledExprSyntax(
-                            expression: MemberAccessExprSyntax(period: .periodToken(), name: .identifier("json"))
+                            expression: MemberAccessExprSyntax(
+                                period: .periodToken(),
+                                name: .identifier("json")
+                            )
                         )
                     }
                 )
@@ -313,25 +329,25 @@ enum APIBuilder {
     ) -> FunctionCallExprSyntax {
         // Map Swift types to OpenAPI schema types
         let schemaType = switch typeIdentifier {
-            case "String", "String?":
-                "string"
-            case "Int", "Int8", "Int16", "Int32", "Int64", "Int?", "Int8?", "Int16?", "Int32?",
-                 "Int64?":
-                "integer"
-            case "Float", "Double", "Float?", "Double?":
-                "number"
-            case "Bool", "Bool?":
-                "boolean"
-            case let type where type.hasSuffix("?") && type.dropLast().hasSuffix("Array"):
-                "array"
-            case let type where type.hasSuffix("Array"):
-                "array"
-            case let type where self.isCustomType(type):
-                // For custom types, reference them in the components/schemas section
-                "object" // or reference the custom schema
-            default:
-                "object"
-            }
+        case "String", "String?":
+            "string"
+        case "Int", "Int8", "Int16", "Int32", "Int64", "Int?", "Int8?", "Int16?", "Int32?",
+             "Int64?":
+            "integer"
+        case "Float", "Double", "Float?", "Double?":
+            "number"
+        case "Bool", "Bool?":
+            "boolean"
+        case let type where type.hasSuffix("?") && type.dropLast().hasSuffix("Array"):
+            "array"
+        case let type where type.hasSuffix("Array"):
+            "array"
+        case let type where self.isCustomType(type):
+            // For custom types, reference them in the components/schemas section
+            "object" // or reference the custom schema
+        default:
+            "object"
+        }
 
         // For custom types, we need to handle them differently
         if self.isCustomType(typeIdentifier) {

@@ -1,8 +1,7 @@
 //
-//  QueryParameterTests 2.swift
-//  Vyper
+//  QueryParameterTests.swift
 //
-//  Created by Noah Kamara on 23.08.2025.
+//  Copyright © 2024 Noah Kamara.
 //
 
 import MacroTesting
@@ -15,7 +14,7 @@ struct QueryParameterTests {
     func base() {
         assertMacro {
             """
-            @API(.excludeFromDocs)
+            @API(traits: .excludeFromDocs)
             struct TestController {
                 @GET(":foo", ":bar")
                 func list(@Query foo: String, @Query bar baz: Int) -> Response {
@@ -49,7 +48,7 @@ struct QueryParameterTests {
     func optionalParameter() {
         assertMacro {
             """
-            @API(.excludeFromDocs)
+            @API(traits: .excludeFromDocs)
             struct TestController {
                 @GET(":foo", ":bar")
                 func list(@Query foo: String?, @Query bar: Int?) -> Response {
@@ -83,7 +82,7 @@ struct QueryParameterTests {
     func requiredParameter() {
         assertMacro {
             """
-            @API(.excludeFromDocs)
+            @API(traits: .excludeFromDocs)
             struct TestController {
                 @GET(":foo", ":bar")
                 func list(@Query foo: String) -> Response {
@@ -116,7 +115,7 @@ struct QueryParameterTests {
     func convertibleParameter() {
         assertMacro {
             """
-            @API(.excludeFromDocs)
+            @API(traits: .excludeFromDocs)
             struct TestController {
                 @GET(":foo", ":bar")
                 func list(@Query foo: Int) -> Response {

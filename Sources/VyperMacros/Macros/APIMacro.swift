@@ -26,27 +26,50 @@ package struct APIMacro: ExtensionMacro {
     }
 
     static func parseOptions(from node: AttributeSyntax) throws -> APIOptions {
+        var options = APIOptions()
+
         guard let arguments = node.arguments?.as(LabeledExprListSyntax.self) else {
             return APIOptions()
         }
+
+        var isParsingTraits = false
+        var pathComponents: [ExprSyntax] = []
 
         for argument in arguments {
             let builder = DiagnosticBuilder(for: argument)
                 .messageID(domain: "vyper", id: "api.invalidOption")
 
+            if argument.label?.text == "traits" {
+                isParsingTraits = true
+            }
+
+            guard isParsingTraits else {
+                pathComponents.append(argument.expression)
+                continue
+            }
+
             guard let expression = argument.expression.as(MemberAccessExprSyntax.self) else {
-                throw builder.message("invalid argument").build()
+                continue
             }
 
             if expression.declName.trimmedDescription == "excludeFromDocs" {
-                return APIOptions(excludeFromDocs: true)
+                options.excludeFromDocs = true
+                continue
             }
+
+            throw builder
+                .message("Unknown trait option: \(expression.declName.trimmedDescription).")
+                .build()
         }
 
-        return APIOptions()
+        options.path = pathComponents
+
+        return options
     }
 }
 
 struct APIOptions {
     var excludeFromDocs: Bool = false
+    var path: [ExprSyntax] = []
+    var traits: [ExprSyntax] = []
 }

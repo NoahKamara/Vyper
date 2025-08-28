@@ -14,10 +14,10 @@ struct PathParameterTests {
     func optionalParameter() {
         assertMacro {
             """
-            @API(.excludeFromDocs)
+            @API(traits: .excludeFromDocs)
             struct TestController {
-                @GET(":foo", ":bar")
-                func list(@Path foo: String?, @Path bar: Int?) -> Response {
+                @GET("users", ":id")
+                func getUser(@Path id: String) -> Response {
                     Response(statusCode: 200)
                 }
             }
@@ -25,18 +25,17 @@ struct PathParameterTests {
         } expansion: {
             """
             struct TestController {
-                @GET(":foo", ":bar")
-                func list(@Path foo: String?, @Path bar: Int?) -> Response {
+                @GET("users", ":id")
+                func getUser(@Path id: String) -> Response {
                     Response(statusCode: 200)
                 }
             }
 
             extension TestController: RouteCollection {
                 func boot(routes: RoutesBuilder) throws {
-                    routes.on(.GET, ":foo", ":bar") { request in
-                        let foo: String? = request.parameters.get("foo")
-                        let bar: Int? = request.parameters.get("bar")
-                        return self.list(foo: foo, bar: bar)
+                    routes.on(.GET, "users", ":id") { request in
+                        let id: String = try request.parameters.require("id")
+                        return self.getUser(id: id)
                     }
                 }
             }
@@ -48,10 +47,10 @@ struct PathParameterTests {
     func requiredParameter() {
         assertMacro {
             """
-            @API(.excludeFromDocs)
+            @API(traits: .excludeFromDocs)
             struct TestController {
-                @GET(":foo", ":bar")
-                func list(@Path foo: String) -> Response {
+                @GET("users", ":id")
+                func getUser(@Path id: String) -> Response {
                     Response(statusCode: 200)
                 }
             }
@@ -59,17 +58,17 @@ struct PathParameterTests {
         } expansion: {
             """
             struct TestController {
-                @GET(":foo", ":bar")
-                func list(@Path foo: String) -> Response {
+                @GET("users", ":id")
+                func getUser(@Path id: String) -> Response {
                     Response(statusCode: 200)
                 }
             }
 
             extension TestController: RouteCollection {
                 func boot(routes: RoutesBuilder) throws {
-                    routes.on(.GET, ":foo", ":bar") { request in
-                        let foo: String = try request.parameters.require("foo")
-                        return self.list(foo: foo)
+                    routes.on(.GET, "users", ":id") { request in
+                        let id: String = try request.parameters.require("id")
+                        return self.getUser(id: id)
                     }
                 }
             }
@@ -81,7 +80,7 @@ struct PathParameterTests {
     func convertibleParameter() {
         assertMacro {
             """
-            @API(.excludeFromDocs)
+            @API(traits: .excludeFromDocs)
             struct TestController {
                 @GET(":foo", ":bar")
                 func list(@Path foo: Int) -> Response {

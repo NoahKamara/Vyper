@@ -10,7 +10,7 @@ import Vapor
 // MARK: Protocol attributes
 
 @attached(extension, conformances: RouteCollection, names: named(boot))
-public macro API(_ typeName: String? = nil) = #externalMacro(
+public macro API(_ path: PathComponent..., traits: Trait...) = #externalMacro(
     module: "VyperMacros",
     type: "APIMacro"
 )
