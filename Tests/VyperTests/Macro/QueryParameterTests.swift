@@ -32,7 +32,7 @@ struct QueryParameterTests {
                 }
             }
 
-            extension TestController {
+            extension TestController: RouteCollection {
                 func boot(routes: RoutesBuilder) throws {
                     routes.on(.GET, ":foo", ":bar") { request in
                         let foo: String = try request.query.get(at: "foo")
@@ -66,7 +66,7 @@ struct QueryParameterTests {
                 }
             }
 
-            extension TestController {
+            extension TestController: RouteCollection {
                 func boot(routes: RoutesBuilder) throws {
                     routes.on(.GET, ":foo", ":bar") { request in
                         let foo: String? = request.query["foo"]
@@ -100,7 +100,7 @@ struct QueryParameterTests {
                 }
             }
 
-            extension TestController {
+            extension TestController: RouteCollection {
                 func boot(routes: RoutesBuilder) throws {
                     routes.on(.GET, ":foo", ":bar") { request in
                         let foo: String = try request.query.get(at: "foo")
@@ -133,7 +133,7 @@ struct QueryParameterTests {
                 }
             }
 
-            extension TestController {
+            extension TestController: RouteCollection {
                 func boot(routes: RoutesBuilder) throws {
                     routes.on(.GET, ":foo", ":bar") { request in
                         let foo: Int = try request.query.get(at: "foo")

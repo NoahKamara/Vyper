@@ -34,6 +34,7 @@ struct API {
 struct APIRoute: CustomStringConvertible {
     struct Parameter: CustomStringConvertible {
         let name: String
+        let secondName: String?
         let type: String
         let isOptional: Bool
         let kind: Kind
@@ -42,19 +43,38 @@ struct APIRoute: CustomStringConvertible {
             "\(name): \(type)\(isOptional ? "?" : "") (\(kind))"
         }
 
-        package init(name: String, type: String, isOptional: Bool, kind: Kind) {
+        package init(
+            name: String,
+            secondName: String?,
+            type: String,
+            isOptional: Bool,
+            kind: Kind
+        ) {
             self.name = name
+            self.secondName = secondName
             self.type = type
             self.isOptional = isOptional
             self.kind = kind
         }
 
-        enum Kind: String, Sendable {
+        enum Kind: Sendable, Equatable {
             case path
             case header
             case query
             case field
             case body
+            case passthrough(ExprSyntax?)
+
+            var rawLocation: String? {
+                switch self {
+                case .path: "path"
+                case .header: "header"
+                case .query: "query"
+                case .field: "field"
+                case .body: "body"
+                case .passthrough: nil
+                }
+            }
         }
     }
 

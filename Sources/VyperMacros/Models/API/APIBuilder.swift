@@ -40,6 +40,11 @@ enum APIBuilder {
 
         return ExtensionDeclSyntax(
             extendedType: extendedType,
+            inheritanceClause: .init(
+                inheritedTypes: [
+                    .init(type: IdentifierTypeSyntax(name: .identifier("RouteCollection")))
+                ]
+            ),
             memberBlock: .init(members: .init([.init(decl: bootstrapFunction)]))
         )
     }
@@ -149,18 +154,25 @@ enum APIBuilder {
 
         // Parameters .openAPI(custom: \.parameters, [...])
         if !route.parameters.isEmpty {
-            let parameterObjects = route.parameters.map { parameter in
-                let parameterMarkup = route.markup.discussionTags?.parameters
-                    .first(where: { $0.name == parameter.name })?
-                    .contents
-                    .map { $0.format() }
-                    .joined(separator: "\n")
+            let parameterObjects: [FunctionCallExprSyntax] = route.parameters
+                .compactMap { parameter in
+                    if case .passthrough = parameter.kind {
+                        return nil
+                    }
 
-                return self.buildParameterObject(
-                    parameter: parameter,
-                    markup: parameterMarkup
-                )
-            }
+                    let parameterMarkup = route.markup.discussionTags?.parameters
+                        .first(
+                            where: { $0.name == parameter.name || $0.name == parameter.secondName }
+                        )?
+                        .contents
+                        .map { $0.format() }
+                        .joined(separator: "\n")
+
+                    return self.buildParameterObject(
+                        parameter: parameter,
+                        markup: parameterMarkup
+                    )
+                }
 
             funcCall = funcCall.openAPI(
                 keyPath: "parameters",
@@ -207,18 +219,18 @@ enum APIBuilder {
                     label: "name",
                     expression: StringLiteralExprSyntax(content: parameter.name)
                 )
+                LabeledExprSyntax(
+                    label: "in",
+                    expression: MemberAccessExprSyntax(
+                        declName: .init(baseName: .identifier(parameter.kind.rawLocation!))
+                    )
+                )
                 if let markup {
                     LabeledExprSyntax(
                         label: "description",
                         expression: StringLiteralExprSyntax(content: markup)
                     )
                 }
-                LabeledExprSyntax(
-                    label: "in",
-                    expression: MemberAccessExprSyntax(
-                        declName: .init(baseName: .identifier(parameter.kind.rawValue))
-                    )
-                )
                 if !parameter.isOptional {
                     LabeledExprSyntax(
                         label: "required",
@@ -362,19 +374,14 @@ enum APIBuilder {
         // Option 1: Reference to components/schemas (recommended for complex types)
         return FunctionCallExprSyntax.dotCall("schema") {
             LabeledExprSyntax(
-                expression: FunctionCallExprSyntax.dotCall(<#T##declName: String##String#>, argumentList: <#T##() -> LabeledExprListSyntax#>)(
-                    calledExpression: DeclReferenceExprSyntax(
-                        baseName: .identifier("SchemaObject")
-                    ),
-                    arguments: [
-                        LabeledExprSyntax(
-                            label: "ref",
-                            expression: StringLiteralExprSyntax(
-                                content: "#/components/schemas/\(cleanType)"
-                            )
-                        ),
-                    ]
-                )
+                expression: FunctionCallExprSyntax.dotCall("init") {
+                    LabeledExprSyntax(
+                        label: "ref",
+                        expression: StringLiteralExprSyntax(
+                            content: "#/components/schemas/\(cleanType)"
+                        )
+                    )
+                }
             )
         }
 
@@ -421,6 +428,12 @@ enum APIBuilder {
                 }
             case .field: ExprSyntax(literal: "")
             case .body: ExprSyntax(literal: "")
+            case .passthrough(let expr):
+                if let expr {
+                    "request[keyPath: \(raw: expr)]"
+                } else {
+                    "request"
+                }
             }
 
         let typeAnnotation =

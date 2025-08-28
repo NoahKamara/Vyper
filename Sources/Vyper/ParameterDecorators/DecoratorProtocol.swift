@@ -9,7 +9,6 @@
 public protocol DecoratorProtocol {
     associatedtype T
     var wrappedValue: T { get set }
-    init(wrappedValue: T)
 }
 
 extension DecoratorProtocol {

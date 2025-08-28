@@ -31,7 +31,7 @@ struct PathParameterTests {
                 }
             }
 
-            extension TestController {
+            extension TestController: RouteCollection {
                 func boot(routes: RoutesBuilder) throws {
                     routes.on(.GET, ":foo", ":bar") { request in
                         let foo: String? = request.parameters.get("foo")
@@ -65,7 +65,7 @@ struct PathParameterTests {
                 }
             }
 
-            extension TestController {
+            extension TestController: RouteCollection {
                 func boot(routes: RoutesBuilder) throws {
                     routes.on(.GET, ":foo", ":bar") { request in
                         let foo: String = try request.parameters.require("foo")
@@ -98,7 +98,7 @@ struct PathParameterTests {
                 }
             }
 
-            extension TestController {
+            extension TestController: RouteCollection {
                 func boot(routes: RoutesBuilder) throws {
                     routes.on(.GET, ":foo", ":bar") { request in
                         let foo: Int = try request.parameters.require("foo")

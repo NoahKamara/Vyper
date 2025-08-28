@@ -37,11 +37,11 @@ struct APIParserTests {
     @Test(
         "Parameter Kind",
         arguments: [
-            ("@Path",   APIRoute.Parameter.Kind.path),
-            ("@Query",  APIRoute.Parameter.Kind.query),
-            ("@Query",  APIRoute.Parameter.Kind.query),
-            ("@Header", APIRoute.Parameter.Kind.header),
-            ("@Body",   APIRoute.Parameter.Kind.body),
+            ("@Path",        APIRoute.Parameter.Kind.path),
+            ("@Query",       APIRoute.Parameter.Kind.query),
+            ("@Header",      APIRoute.Parameter.Kind.header),
+//            ("@Body",        APIRoute.Parameter.Kind.body),
+            ("@Passthrough", APIRoute.Parameter.Kind.passthrough(nil)),
         ]
     )
     func parameterKind(decorator: String, kind: APIRoute.Parameter.Kind) throws {

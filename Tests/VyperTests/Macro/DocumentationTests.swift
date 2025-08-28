@@ -36,7 +36,7 @@ struct DocumentationTests {
                 }
             }
 
-            extension TestController {
+            extension TestController: RouteCollection {
                 func boot(routes: RoutesBuilder) throws {
                     routes.on(.GET) { request in
                         return self.list()
@@ -81,19 +81,61 @@ struct DocumentationTests {
                 }
             }
 
-            extension TestController {
+            extension TestController: RouteCollection {
                 func boot(routes: RoutesBuilder) throws {
                     routes.on(.GET) { request in
                         let path: String = try request.parameters.require("path")
                         let query: String = try request.query.get(at: "query")
                         return self.list(path: path, query: query)
                     }
-                    .openAPI(custom: \.parameters, [.init(name: "path", description: "path parameter.", in: .path, required: true, schema: .string), .init(name: "query", description: "query parameter.", in: .query, required: true, schema: .string)])
+                    .openAPI(custom: \.parameters, [
+                            .value(.init(name: "path", in: .path, description: "path parameter.", required: true, schema: .string)),
+                            .value(.init(name: "query", in: .query, description: "query parameter.", required: true, schema: .string))])
                 }
             }
             """#
         }
     }
+
+    @Test
+    func secondNameParameter() {
+        assertMacro {
+            """
+            @API
+            struct TestController {
+                /// - Parameters:
+                ///     - secondName: path parameter.
+                @GET
+                func list(@Path path secondName: String) -> Response {
+                    Response(statusCode: 200)
+                }
+            }
+            """
+        } expansion: {
+            #"""
+            struct TestController {
+                /// - Parameters:
+                ///     - secondName: path parameter.
+                @GET
+                func list(@Path path secondName: String) -> Response {
+                    Response(statusCode: 200)
+                }
+            }
+
+            extension TestController: RouteCollection {
+                func boot(routes: RoutesBuilder) throws {
+                    routes.on(.GET) { request in
+                        let path: String = try request.parameters.require("path")
+                        return self.list(path: path)
+                    }
+                    .openAPI(custom: \.parameters, [
+                            .value(.init(name: "path", in: .path, description: "path parameter.", required: true, schema: .string))])
+                }
+            }
+            """#
+        }
+    }
+
 //
 //    @Test("Standalone Parameter")
 //    func standaloneParameter() async throws {
