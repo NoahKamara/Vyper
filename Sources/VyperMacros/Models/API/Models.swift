@@ -62,7 +62,7 @@ struct APIRoute: CustomStringConvertible {
             case header
             case query
             case field
-            case body
+            case body([ExprSyntax]?)
             case passthrough(ExprSyntax?)
 
             var rawLocation: String? {

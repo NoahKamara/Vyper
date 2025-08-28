@@ -105,6 +105,7 @@ enum APIParser {
     ) throws -> APIRoute.Parameter {
         let kinds: [APIRoute.Parameter.Kind] = parameter.attributes.compactMap { attr in
             let attribute = attr.as(AttributeSyntax.self)
+            let arguments = attribute?.arguments?.as(LabeledExprListSyntax.self)
 
             switch attribute?.attributeName.trimmedDescription {
             case "Path":
@@ -114,9 +115,10 @@ enum APIParser {
             case "Query":
                 return .query
 //            case "Field": .field
-//            case "Body": .body
+            case "Body":
+                    return .body(arguments?.map({ $0.expression }))
             case "Passthrough":
-                guard let firstArg = attribute?.arguments?.as(LabeledExprListSyntax.self)?.first else {
+                guard let firstArg = arguments?.first else {
                     return .passthrough(nil)
                 }
                 return .passthrough(firstArg.expression)
@@ -127,9 +129,9 @@ enum APIParser {
 
         guard kinds.count == 1 else {
             throw DiagnosticBuilder(for: parameter)
-                .message(
-                    "Route parameters must have exactly one of @Path, @Header, @Query, or @Passthrough"
-                )
+                .message("""
+                Route parameters must have exactly one of @Path, @Query, @Body, @Header or @Passthrough
+                """)
                 .build()
         }
 

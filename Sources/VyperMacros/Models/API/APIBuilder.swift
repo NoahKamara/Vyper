@@ -443,7 +443,12 @@ enum APIBuilder {
                     throw VyperMacrosError("Header parameters must be optional")
                 }
             case .field: ExprSyntax(literal: "")
-            case .body: ExprSyntax(literal: "")
+            case .body(let keyPath):
+                if let keyPath = keyPath?.map({ $0.trimmedDescription }).joined(separator: ", ") {
+                    "request.content.get(at: \(raw: keyPath))"
+                } else {
+                    "request.content.decode(\(raw: parameter.type).self)"
+                }
             case .passthrough(let expr):
                 if let expr {
                     "request[keyPath: \(raw: expr)]"
