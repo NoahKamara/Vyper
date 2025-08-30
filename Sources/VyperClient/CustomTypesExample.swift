@@ -5,65 +5,11 @@
 //
 
 import Foundation
-import Vapor
 import Vyper
-
-/// A todo item with basic properties for task management
-struct Todo: Content {
-    /// Unique identifier for the todo item
-    let id: Int
-    /// The title or description of the todo task
-    let title: String
-    /// Whether the todo task has been completed
-    let isCompleted: Bool
-    /// When the todo item was created
-    let createdAt: Date
-
-    /// Data structure for creating new todo items
-    struct Create: Content {
-        /// The title or description of the todo task
-        let title: String
-        /// Whether the todo task has been completed
-        let isCompleted: Bool
-        /// When the todo item was created
-        let createdAt: Date
-    }
-}
-
-/// A user in the system
-struct User: Content {
-    /// Unique identifier for the user
-    let id: String
-    /// Display name of the user
-    let name: String
-    /// Email address of the user
-    let email: String
-}
-
-/// Search filters for querying todos
-struct SearchFilters: Content {
-    /// Text query to search for in todo titles
-    let query: String
-    /// Optional category filter for todos
-    let category: String?
-    /// Field to sort results by
-    let sortBy: String
-}
-
-import VaporToOpenAPI
-
-// Your macro should parse these and generate appropriate OpenAPI schemas
 
 /// Example controller demonstrating Vyper's custom types and API annotations
 @API
 struct CustomTypesController {
-    /// In-memory storage for todos (for demonstration purposes)
-    @MainActor
-    var allTodos = [
-        Todo(id: 0, title: "Procrastinate", isCompleted: true, createdAt: .distantPast),
-        Todo(id: 1, title: "Build Vypre", isCompleted: false, createdAt: .now),
-    ]
-
     /// Retrieves all todos
     /// - Returns: An array of all todo items
     @GET
@@ -112,10 +58,42 @@ struct CustomTypesController {
     @PATCH(":todoId")
     func create(@Path todoId id: Int, @Body body: Todo.Create) throws -> Todo {
         Todo(
-            id: todoId,
+            id: id,
             title: body.title,
             isCompleted: body.isCompleted,
             createdAt: body.createdAt
         )
     }
+}
+
+/// A todo item with basic properties for task management
+struct Todo: Content {
+    /// Unique identifier for the todo item
+    let id: Int
+    /// The title or description of the todo task
+    let title: String
+    /// Whether the todo task has been completed
+    let isCompleted: Bool
+    /// When the todo item was created
+    let createdAt: Date
+
+    /// Data structure for creating new todo items
+    struct Create: Content {
+        /// The title or description of the todo task
+        let title: String
+        /// Whether the todo task has been completed
+        let isCompleted: Bool
+        /// When the todo item was created
+        let createdAt: Date
+    }
+}
+
+/// Search filters for querying todos
+struct SearchFilters: Content {
+    /// Text query to search for in todo titles
+    let query: String
+    /// Optional category filter for todos
+    let category: String?
+    /// Field to sort results by
+    let sortBy: String
 }

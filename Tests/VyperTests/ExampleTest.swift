@@ -9,7 +9,7 @@ import MacroTesting
 import Testing
 @testable import VyperMacros
 
-@Test("Example Test", .macros([APIMacro.self]), .tags(.macro))
+@Test("Example Test", .macros([APIMacro.self], record: true), .tags(.macro))
 func exampleTest() async throws {
     assertMacro {
         """
@@ -139,41 +139,65 @@ func exampleTest() async throws {
                 routes.on(.GET) { request in
                     return self.todos()
                 }
-                .openAPI(summary: "Retrieves all todos", response: [Todo].self, responseContentType: Self
-                    .responseContentType(for: [Todo].self), responseDescription: "An array of all todo items")
+                .openAPI(
+                    summary: "Retrieves all todos",
+                    response: .type([Todo].self),
+                    responseContentType: Self
+                    .responseContentType(for: [Todo].self),
+                    responseDescription: "An array of all todo items")
                 routes.on(.GET, ":todoId") { request in
                     let todoId: Int = try request.parameters.require("todoId")
                     return try self.retrieve(todoId: todoId)
                 }
-                .openAPI(summary: "Retrieves a specific todo by its ID", path: [
-                    .init(name: "todoId", in: .path, description: "The unique identifier of the todo to retrieve", required: true, schema: .integer)
-                    ], response: Todo.self, responseContentType: Self
-                    .responseContentType(for: Todo.self), responseDescription: "The todo item with the specified ID")
+                .openAPI(
+                    summary: "Retrieves a specific todo by its ID",
+                    path: .init(
+                        .init(name: "todoId", in: .path, description: "The unique identifier of the todo to retrieve", required: true, schema: .integer)),
+                    response: .type(Todo.self),
+                    responseContentType: Self
+                    .responseContentType(for: Todo.self),
+                    responseDescription: "The todo item with the specified ID")
                 routes.on(.GET, "search") { request in
                     let filters: SearchFilters = try request.query.get(at: "filters")
                     return try await self.search(filters: filters)
                 }
-                .openAPI(summary: "Searches for todos based on provided filters", query: [
-                    .init(name: "filters", in: .query, description: "Search criteria including query, category, and sort options", required: true, schema: .schema(.init(ref: "#/components/schemas/SearchFilters")))
-                    ], response: [Todo].self, responseContentType: Self
-                    .responseContentType(for: [Todo].self), responseDescription: "An array of todos matching the search criteria")
+                .openAPI(
+                    summary: "Searches for todos based on provided filters",
+                    query: .init(
+                        .init(name: "filters", in: .query, description: "Search criteria including query, category, and sort options", required: true, schema: .ref("#/components/schemas/SearchFilters"))),
+                    response: .type([Todo].self),
+                    responseContentType: Self
+                    .responseContentType(for: [Todo].self),
+                    responseDescription: "An array of todos matching the search criteria")
                 routes.on(.POST) { request in
                     let body: Todo.Create = try request.content.decode(Todo.Create.self)
                     return try self.create(body: body)
                 }
-                .openAPI(summary: "Creates a new todo item", body: .type(Todo.Create.self), contentType: Self
-                    .responseContentType(for: Todo.Create.self), response: Todo.self, responseContentType: Self
-                    .responseContentType(for: Todo.self), responseDescription: "The newly created todo item")
+                .openAPI(
+                    summary: "Creates a new todo item",
+                    body: .type(Todo.Create.self),
+                    contentType: Self
+                    .responseContentType(for: Todo.Create.self),
+                    response: .type(Todo.self),
+                    responseContentType: Self
+                    .responseContentType(for: Todo.self),
+                    responseDescription: "The newly created todo item")
                 routes.on(.PATCH, ":todoId") { request in
                     let todoId: Int = try request.parameters.require("todoId")
                     let body: Todo.Create = try request.content.decode(Todo.Create.self)
                     return try self.create(todoId: todoId, body: body)
                 }
-                .openAPI(summary: "Updates an existing todo item", path: [
-                    .init(name: "todoId", in: .path, description: "The unique identifier of the todo to update", required: true, schema: .integer)
-                    ], body: .type(Todo.Create.self), contentType: Self
-                    .responseContentType(for: Todo.Create.self), response: Todo.self, responseContentType: Self
-                    .responseContentType(for: Todo.self), responseDescription: "The updated todo item")
+                .openAPI(
+                    summary: "Updates an existing todo item",
+                    path: .init(
+                        .init(name: "todoId", in: .path, description: "The unique identifier of the todo to update", required: true, schema: .integer)),
+                    body: .type(Todo.Create.self),
+                    contentType: Self
+                    .responseContentType(for: Todo.Create.self),
+                    response: .type(Todo.self),
+                    responseContentType: Self
+                    .responseContentType(for: Todo.self),
+                    responseDescription: "The updated todo item")
             }
         }
         """

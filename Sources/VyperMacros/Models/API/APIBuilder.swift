@@ -166,7 +166,7 @@ enum APIBuilder {
                     buildParameterObject(parameter: parameter, markup: markup)
                 )
             case .cookie:
-                pathParameters.append(
+                cookieParameters.append(
                     buildParameterObject(parameter: parameter, markup: markup)
                 )
             case .body:
@@ -177,9 +177,6 @@ enum APIBuilder {
             case .passthrough: break
             }
         }
-
-        let response = route.returnType.map(MemberAccessExprSyntax.typeReference)
-        let responseDescription: String? = route.markup.discussionTags?.returns.first?.format()
 
         let openAPICall = funcCall.call("openAPI") {
             //        customMethod: <#T##PathItemObject.Method?#>,
@@ -201,35 +198,60 @@ enum APIBuilder {
 
             //        operationId: <#T##String?#>,
             //        externalDocs: <#T##ExternalDocumentationObject?#>,
-            //        query: <#T##OpenAPIParameters?#>,
-
-            // Parameters .openAPI(custom: \.parameters, [...])
 
             if !queryParameters.isEmpty {
                 LabeledExprSyntax(
                     label: "query",
-                    expression: ArrayExprSyntax.multiline { queryParameters }
+                    expression: FunctionCallExprSyntax.dotCall("init") {
+                        queryParameters.map({
+                            LabeledExprSyntax(
+                                leadingTrivia: [.newlines(1), .spaces(8)],
+                                expression: $0
+                            )
+                        })
+                    }
                 )
             }
 
             if !headerParameters.isEmpty {
                 LabeledExprSyntax(
-                    label: "header",
-                    expression: ArrayExprSyntax.multiline { headerParameters }
+                    label: "path",
+                    expression: FunctionCallExprSyntax.dotCall("init") {
+                        headerParameters.map({
+                            LabeledExprSyntax(
+                                leadingTrivia: [.newlines(1), .spaces(8)],
+                                expression: $0
+                            )
+                        })
+                    }
                 )
             }
 
             if !pathParameters.isEmpty {
                 LabeledExprSyntax(
                     label: "path",
-                    expression: ArrayExprSyntax.multiline { pathParameters }
+                    expression: FunctionCallExprSyntax.dotCall("init") {
+                        pathParameters.map({
+                            LabeledExprSyntax(
+                                leadingTrivia: [.newlines(1), .spaces(8)],
+                                expression: $0
+                            )
+                        })
+                    }
                 )
             }
 
             if !cookieParameters.isEmpty {
                 LabeledExprSyntax(
                     label: "cookies",
-                    expression: ArrayExprSyntax.multiline { cookieParameters }
+                    expression: FunctionCallExprSyntax.dotCall("init") {
+                        cookieParameters.map({
+                            LabeledExprSyntax(
+                                leadingTrivia: [.newlines(1), .spaces(8)],
+                                expression: $0
+                            )
+                        })
+                    }
                 )
             }
 
@@ -252,23 +274,30 @@ enum APIBuilder {
                 )
             }
 
-            if let response {
+            if let returnType = route.returnType {
                 LabeledExprSyntax(
                     label: "response",
-                    expression: response
+                    expression: FunctionCallExprSyntax.dotCall("type") {
+                        LabeledExprSyntax(
+                            expression: MemberAccessExprSyntax.typeReference(returnType)
+                        )
+                    }
                 )
 
                 LabeledExprSyntax(
                     label: "responseContentType",
                     expression: FunctionCallExprSyntax.call("Self", "responseContentType") {
-                        LabeledExprSyntax(label: "for", expression: response)
+                        LabeledExprSyntax(
+                            label: "for",
+                            expression: MemberAccessExprSyntax.typeReference(returnType)
+                        )
                     }
                 )
             }
 
             //        responseHeaders: <#T##OpenAPIParameters?#>,
 
-            if let responseDescription {
+            if let responseDescription = route.markup.discussionTags?.returns.first?.format() {
                 LabeledExprSyntax(
                     label: "responseDescription",
                     expression: StringLiteralExprSyntax(content: responseDescription)
@@ -292,79 +321,6 @@ enum APIBuilder {
         }
 
         return openAPICall
-
-        // Return type .openAPI(custom: \.requestBody, .type(ResponseBodyType.self))
-        let bodyParameters = route.parameters.filter({
-            if case .body = $0.kind { true } else { false }
-        })
-
-        if bodyParameters.count == 1 {
-            funcCall = funcCall.openAPI(
-                keyPath: "requestBody",
-                FunctionCallExprSyntax.dotCall("type") {
-                    LabeledExprSyntax(
-                        expression: MemberAccessExprSyntax(
-                            base: DeclReferenceExprSyntax(baseName: .identifier(bodyParameters[0].type)),
-                            name: .keyword(.self)
-                        )
-                    )
-                }
-            )
-        } else if bodyParameters.count > 1 {
-            fatalError("Multiple body parameters not yet supported")
-        }
-
-        // Parameters .openAPI(custom: \.parameters, [...])
-        let parameterObjects: [FunctionCallExprSyntax] = route.parameters
-            .compactMap { parameter in
-                guard parameter.kind.isParameter else {
-                    return nil
-                }
-
-                let parameterMarkup = route.markup.discussionTags?.parameters
-                    .first(
-                        where: { $0.name == parameter.name || $0.name == parameter.secondName }
-                    )?
-                    .contents
-                    .map { $0.format() }
-                    .joined(separator: "\n")
-
-                return self.buildParameterObject(
-                    parameter: parameter,
-                    markup: parameterMarkup
-                )
-            }
-
-        if !parameterObjects.isEmpty {
-            funcCall = funcCall.openAPI(
-                keyPath: "parameters",
-                ArrayExprSyntax.multiline {
-                    parameterObjects
-                }
-            )
-        }
-
-        // Return type .openAPI(custom: \.responses, [...])
-        if let returnType = route.returnType {
-            funcCall = self.callResponse(
-                route: funcCall,
-                returnType: returnType,
-                markup: route.markup.discussionTags?.returns.first?.format()
-            )
-        }
-
-        return funcCall
-    }
-
-    private static func buildParameters(_ parameters: [APIRoute.Parameter]) {
-        DictionaryExprSyntax {
-            parameters.map { parameter in
-                DictionaryElementSyntax(
-                    key: StringLiteralExprSyntax(content: parameter.name),
-                    value: buildParameterObject(parameter: parameter, markup: nil)
-                )
-            }
-        }
     }
 
     private static func buildParameterObject(
@@ -405,58 +361,6 @@ enum APIBuilder {
                 )
             }
         )
-    }
-
-    private static func callResponse(
-        route: FunctionCallExprSyntax,
-        returnType: String,
-        markup: String?
-    ) -> FunctionCallExprSyntax {
-        let schemaType = self.getOpenAPISchemaType(for: returnType)
-
-        return route.call("response") {
-            LabeledExprSyntax(
-                label: "body",
-                expression: FunctionCallExprSyntax(
-                    callee: MemberAccessExprSyntax(
-                        period: .periodToken(),
-                        name: .identifier("type")
-                    ),
-                    argumentList: {
-                        LabeledExprSyntax(expression: MemberAccessExprSyntax(
-                            base: DeclReferenceExprSyntax(baseName: .identifier(returnType)),
-                            period: .periodToken(),
-                            name: .keyword(.self)
-                        ))
-                    }
-                )
-            )
-
-            LabeledExprSyntax(
-                label: "contentType",
-                expression: FunctionCallExprSyntax(
-                    callee: MemberAccessExprSyntax(
-                        period: .periodToken(),
-                        name: .identifier("application")
-                    ),
-                    argumentList: {
-                        LabeledExprSyntax(
-                            expression: MemberAccessExprSyntax(
-                                period: .periodToken(),
-                                name: .identifier("json")
-                            )
-                        )
-                    }
-                )
-            )
-//            .response(
-//                statusCode: <#T##ResponsesObject.Key#>,
-//                body: <#T##OpenAPIBody?#>,
-//                contentType: <#T##MediaType...##MediaType#>,
-//                headers: <#T##OpenAPIParameters?#>,
-//                description: <#T##String?#>
-//            )
-        }
     }
 
     private static func getOpenAPISchemaType(
@@ -532,16 +436,11 @@ enum APIBuilder {
         // 2. Generate inline schema (for simple cases)
 
         // Option 1: Reference to components/schemas (recommended for complex types)
-        return FunctionCallExprSyntax.dotCall("schema") {
+        return FunctionCallExprSyntax.dotCall("ref") {
             LabeledExprSyntax(
-                expression: FunctionCallExprSyntax.dotCall("init") {
-                    LabeledExprSyntax(
-                        label: "ref",
-                        expression: StringLiteralExprSyntax(
-                            content: "#/components/schemas/\(cleanType)"
-                        )
-                    )
-                }
+                expression: StringLiteralExprSyntax(
+                    content: "#/components/schemas/\(cleanType)"
+                )
             )
         }
 
@@ -660,27 +559,17 @@ extension FunctionCallExprSyntax {
         _ declName: String,
         @LabeledExprListBuilder argumentList: () -> LabeledExprListSyntax = { [] }
     ) -> FunctionCallExprSyntax {
-        FunctionCallExprSyntax(
+        return FunctionCallExprSyntax(
             callee: MemberAccessExprSyntax(
                 base: self,
                 period: .periodToken(leadingTrivia: .newline),
                 declName: .init(baseName: .identifier(declName))
-            ),
-            argumentList: argumentList
-        )
-    }
-
-    func openAPI(keyPath: String, _ value: some ExprSyntaxProtocol) -> FunctionCallExprSyntax {
-        let keyPathExpr = KeyPathExprSyntax(components: [
-            .init(
-                period: .periodToken(),
-                component: .property(.init(declName: .init(baseName: .identifier(keyPath))))
-            ),
-        ])
-
-        return self.call("openAPI") {
-            LabeledExprSyntax(label: "custom", colon: .colonToken(), expression: keyPathExpr)
-            LabeledExprSyntax(expression: value)
+            )
+        ) {
+            argumentList().map { (argument: consuming LabeledExprSyntax) in
+                argument.leadingTrivia = [.newlines(1), .spaces(4)]
+                return argument
+            }
         }
     }
 }
@@ -690,7 +579,7 @@ extension ArrayExprSyntax {
         @ExprListBuilder
         elementsBuilder: () -> ExprListSyntax
     ) -> ArrayExprSyntax {
-        let childTrivia: Trivia = [.newlines(1), .spaces(4)]
+        let childTrivia: Trivia = [.newlines(1), .spaces(8)]
         let elements = elementsBuilder()
 
         return ArrayExprSyntax(

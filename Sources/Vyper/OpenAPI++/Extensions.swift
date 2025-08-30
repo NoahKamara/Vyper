@@ -8,7 +8,7 @@
 import VaporToOpenAPI
 import Vapor
 
-extension RoutesCollection {
+extension RouteCollection {
     public static func responseContentType(for type: Any.Type) -> MediaType {
         switch type {
         case let custom as CustomContentType.Type:

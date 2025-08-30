@@ -16,7 +16,7 @@ struct APIOptionTests {
     func excludeFromDocs() {
         assertMacro {
             """
-            @API(.excludeFromDocs)
+            @API(traits: .excludeFromDocs)
             struct TestController {
                 /// Lorem ipsum dolor sit amet.
                 @GET
@@ -33,10 +33,9 @@ struct APIOptionTests {
 
             extension TestController: RouteCollection {
                 func boot(routes: RoutesBuilder) throws {
-                    routes.on(.GET, .excludeFromDocs) { request in
+                    routes.on(.GET) { request in
                         return self.list()
                     }
-                    .openAPI(summary: "Lorem ipsum dolor sit amet.")
                 }
             }
             """
@@ -64,7 +63,6 @@ struct APIOptionTests {
                     routes.on(.GET) { request in
                         return self.list()
                     }
-                    .openAPI(summary: "Lorem ipsum dolor sit amet.")
                 }
             }
             """

@@ -11,8 +11,43 @@ import MacroTesting
 import Testing
 @testable import VyperMacros
 
-@Suite("APIMacro: Documentation", .macros([APIMacro.self], record: true), .tags(.macro))
+@Suite("APIMacro: Documentation", .macros([APIMacro.self]), .tags(.macro))
 struct DocumentationTests {
+    @Test
+    func excluded() {
+        assertMacro {
+            """
+            @API(traits: .excludeFromDocs)
+            struct TestController {
+                /// Lorem ipsum dolor sit amet.
+                @GET
+                func list() -> Response {
+                    Response(statusCode: 200)
+                }
+            }
+            """
+        } expansion: {
+            """
+            struct TestController {
+                /// Lorem ipsum dolor sit amet.
+                @GET
+                func list() -> Response {
+                    Response(statusCode: 200)
+                }
+            }
+
+            extension TestController: RouteCollection {
+                func boot(routes: RoutesBuilder) throws {
+                    routes.on(.GET) { request in
+                        return self.list()
+                    }
+                }
+            }
+            """
+        }
+    }
+
+
     @Test
     func abstract() {
         assertMacro {
@@ -41,7 +76,8 @@ struct DocumentationTests {
                     routes.on(.GET) { request in
                         return self.list()
                     }
-                    .openAPI(summary: "Lorem ipsum dolor sit amet.")
+                    .openAPI(
+                        summary: "Lorem ipsum dolor sit amet.")
                 }
             }
             """
@@ -57,36 +93,53 @@ struct DocumentationTests {
                 /// - Parameters:
                 ///     - path: path parameter.
                 ///     - query: query parameter.
+                ///     - cookie: cookie parameter.
                 @GET
                 func list(
                     @Path path: String,
                     @Query query: String,
-                    @Cookie cookie: String
+                    @Cookie cookie: String?
                 ) -> Response {
                     Response(statusCode: 200)
                 }
             }
             """
-        } diagnostics: {
+        } expansion: {
             """
-            @API
-            ┬───
-            ╰─ 🛑 Cookie parameters must be optional
             struct TestController {
                 /// - Parameters:
                 ///     - path: path parameter.
                 ///     - query: query parameter.
+                ///     - cookie: cookie parameter.
                 @GET
                 func list(
                     @Path path: String,
                     @Query query: String,
-                    @Cookie cookie: String
+                    @Cookie cookie: String?
                 ) -> Response {
                     Response(statusCode: 200)
                 }
             }
+
+            extension TestController: RouteCollection {
+                func boot(routes: RoutesBuilder) throws {
+                    routes.on(.GET) { request in
+                        let path: String = try request.parameters.require("path")
+                        let query: String = try request.query.get(at: "query")
+                        let cookie: String? = request.cookies[name: "cookie"]
+                        return self.list(path: path, query: query, cookie: cookie)
+                    }
+                    .openAPI(
+                        query: .init(
+                            .init(name: "query", in: .query, description: "query parameter.", required: true, schema: .string)),
+                        path: .init(
+                            .init(name: "path", in: .path, description: "path parameter.", required: true, schema: .string)),
+                        cookies: .init(
+                            .init(name: "cookie", in: .cookie, description: "cookie parameter.", schema: .string)))
+                }
+            }
             """
-        } 
+        }
     }
 
     @Test
@@ -118,7 +171,9 @@ struct DocumentationTests {
                         let foo: Foo = try request.content.decode(Foo.self)
                         return self.create(foo: foo)
                     }
-                    .openAPI(body: .type(Foo.self), contentType: Self
+                    .openAPI(
+                        body: .type(Foo.self),
+                        contentType: Self
                         .responseContentType(for: Foo.self))
                 }
             }
@@ -158,9 +213,9 @@ struct DocumentationTests {
                         let path: String = try request.parameters.require("path")
                         return self.list(path: path)
                     }
-                    .openAPI(path: [
-                        .init(name: "path", in: .path, description: "path parameter.", required: true, schema: .string)
-                        ])
+                    .openAPI(
+                        path: .init(
+                            .init(name: "path", in: .path, description: "path parameter.", required: true, schema: .string)))
                 }
             }
             """

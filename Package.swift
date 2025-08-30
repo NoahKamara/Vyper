@@ -25,7 +25,7 @@ let package = Package(
         .package(url: "https://github.com/pointfreeco/swift-macro-testing", from: "0.6.3"),
         .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", from: "1.18.6"),
         .package(url: "https://github.com/dankinsoid/SwiftOpenAPI", from: "2.24.1"),
-        .package(path: "../../VaporToOpenAPI"),
+        .package(path: "../VaporToOpenAPI"),
     ],
     targets: [
         .target(
