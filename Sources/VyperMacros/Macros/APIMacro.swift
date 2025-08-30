@@ -54,6 +54,7 @@ package struct APIMacro: ExtensionMacro {
 
             if expression.declName.trimmedDescription == "excludeFromDocs" {
                 options.excludeFromDocs = true
+                options.traits.append(ExprSyntax(expression))
                 continue
             }
 

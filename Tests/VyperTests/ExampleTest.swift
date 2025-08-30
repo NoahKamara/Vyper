@@ -9,7 +9,7 @@ import MacroTesting
 import Testing
 @testable import VyperMacros
 
-@Test("Example Test", .macros([APIMacro.self], record: true), .tags(.macro))
+@Test("Example Test", .macros([APIMacro.self]), .tags(.macro))
 func exampleTest() async throws {
     assertMacro {
         """

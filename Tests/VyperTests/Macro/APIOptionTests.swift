@@ -1,14 +1,12 @@
 //
-//  DocumentationTests 2.swift
-//  Vyper
+//  APIOptionTests.swift
 //
-//  Created by Noah Kamara on 29.08.2025.
+//  Copyright © 2024 Noah Kamara.
 //
 
 import MacroTesting
 import Testing
 @testable import VyperMacros
-
 
 @Suite("APIMacro: Options", .macros([APIMacro.self]), .tags(.macro))
 struct APIOptionTests {
@@ -63,6 +61,8 @@ struct APIOptionTests {
                     routes.on(.GET) { request in
                         return self.list()
                     }
+                    .openAPI(
+                        summary: "Lorem ipsum dolor sit amet.")
                 }
             }
             """

@@ -116,7 +116,7 @@ enum APIBuilder {
         // Process traits
         for trait in options.traits {
             if let memberAccess = trait.as(MemberAccessExprSyntax.self),
-               memberAccess.declName.trimmedDescription == "ExcludeFromDocs"
+               memberAccess.declName.trimmedDescription == "excludeFromDocs"
             {
                 // Skip OpenAPI generation for this route
                 return funcCall
@@ -151,23 +151,22 @@ enum APIBuilder {
                 .map { $0.format() }
                 .joined(separator: "\n")
 
-
             switch parameter.kind {
             case .query:
                 queryParameters.append(
-                    buildParameterObject(parameter: parameter, markup: markup)
+                    self.buildParameterObject(parameter: parameter, markup: markup)
                 )
             case .header:
                 headerParameters.append(
-                    buildParameterObject(parameter: parameter, markup: markup)
+                    self.buildParameterObject(parameter: parameter, markup: markup)
                 )
             case .path:
                 pathParameters.append(
-                    buildParameterObject(parameter: parameter, markup: markup)
+                    self.buildParameterObject(parameter: parameter, markup: markup)
                 )
             case .cookie:
                 cookieParameters.append(
-                    buildParameterObject(parameter: parameter, markup: markup)
+                    self.buildParameterObject(parameter: parameter, markup: markup)
                 )
             case .body:
                 body = MemberAccessExprSyntax(
@@ -203,12 +202,12 @@ enum APIBuilder {
                 LabeledExprSyntax(
                     label: "query",
                     expression: FunctionCallExprSyntax.dotCall("init") {
-                        queryParameters.map({
+                        queryParameters.map {
                             LabeledExprSyntax(
                                 leadingTrivia: [.newlines(1), .spaces(8)],
                                 expression: $0
                             )
-                        })
+                        }
                     }
                 )
             }
@@ -217,12 +216,12 @@ enum APIBuilder {
                 LabeledExprSyntax(
                     label: "path",
                     expression: FunctionCallExprSyntax.dotCall("init") {
-                        headerParameters.map({
+                        headerParameters.map {
                             LabeledExprSyntax(
                                 leadingTrivia: [.newlines(1), .spaces(8)],
                                 expression: $0
                             )
-                        })
+                        }
                     }
                 )
             }
@@ -231,12 +230,12 @@ enum APIBuilder {
                 LabeledExprSyntax(
                     label: "path",
                     expression: FunctionCallExprSyntax.dotCall("init") {
-                        pathParameters.map({
+                        pathParameters.map {
                             LabeledExprSyntax(
                                 leadingTrivia: [.newlines(1), .spaces(8)],
                                 expression: $0
                             )
-                        })
+                        }
                     }
                 )
             }
@@ -245,12 +244,12 @@ enum APIBuilder {
                 LabeledExprSyntax(
                     label: "cookies",
                     expression: FunctionCallExprSyntax.dotCall("init") {
-                        cookieParameters.map({
+                        cookieParameters.map {
                             LabeledExprSyntax(
                                 leadingTrivia: [.newlines(1), .spaces(8)],
                                 expression: $0
                             )
-                        })
+                        }
                     }
                 )
             }
@@ -327,7 +326,7 @@ enum APIBuilder {
         parameter: APIRoute.Parameter,
         markup: String?
     ) -> FunctionCallExprSyntax {
-        return FunctionCallExprSyntax(
+        FunctionCallExprSyntax(
             callee: MemberAccessExprSyntax(
                 period: .periodToken(),
                 declName: DeclReferenceExprSyntax(baseName: .identifier("init"))
@@ -559,7 +558,7 @@ extension FunctionCallExprSyntax {
         _ declName: String,
         @LabeledExprListBuilder argumentList: () -> LabeledExprListSyntax = { [] }
     ) -> FunctionCallExprSyntax {
-        return FunctionCallExprSyntax(
+        FunctionCallExprSyntax(
             callee: MemberAccessExprSyntax(
                 base: self,
                 period: .periodToken(leadingTrivia: .newline),
@@ -576,8 +575,7 @@ extension FunctionCallExprSyntax {
 
 extension ArrayExprSyntax {
     static func multiline(
-        @ExprListBuilder
-        elementsBuilder: () -> ExprListSyntax
+        @ExprListBuilder elementsBuilder: () -> ExprListSyntax
     ) -> ArrayExprSyntax {
         let childTrivia: Trivia = [.newlines(1), .spaces(8)]
         let elements = elementsBuilder()
