@@ -11,7 +11,7 @@ import MacroTesting
 import Testing
 @testable import VyperMacros
 
-@Suite("APIMacro: Documentation", .macros([APIMacro.self]), .tags(.macro))
+@Suite("APIMacro: Documentation", .macros([APIMacro.self], record: true), .tags(.macro))
 struct DocumentationTests {
     @Test
     func abstract() {
@@ -60,14 +60,18 @@ struct DocumentationTests {
                 @GET
                 func list(
                     @Path path: String,
-                    @Query query: String
+                    @Query query: String,
+                    @Cookie cookie: String
                 ) -> Response {
                     Response(statusCode: 200)
                 }
             }
             """
-        } expansion: {
-            #"""
+        } diagnostics: {
+            """
+            @API
+            ┬───
+            ╰─ 🛑 Cookie parameters must be optional
             struct TestController {
                 /// - Parameters:
                 ///     - path: path parameter.
@@ -75,27 +79,53 @@ struct DocumentationTests {
                 @GET
                 func list(
                     @Path path: String,
-                    @Query query: String
+                    @Query query: String,
+                    @Cookie cookie: String
                 ) -> Response {
+                    Response(statusCode: 200)
+                }
+            }
+            """
+        } 
+    }
+
+    @Test
+    func body() {
+        assertMacro {
+            """
+            @API
+            struct TestController {
+                /// - Parameters foo: the foo object to create
+                @POST
+                func create(@Body foo: Foo) -> Response {
+                    Response(statusCode: 200)
+                }
+            }
+            """
+        } expansion: {
+            """
+            struct TestController {
+                /// - Parameters foo: the foo object to create
+                @POST
+                func create(@Body foo: Foo) -> Response {
                     Response(statusCode: 200)
                 }
             }
 
             extension TestController: RouteCollection {
                 func boot(routes: RoutesBuilder) throws {
-                    routes.on(.GET) { request in
-                        let path: String = try request.parameters.require("path")
-                        let query: String = try request.query.get(at: "query")
-                        return self.list(path: path, query: query)
+                    routes.on(.POST) { request in
+                        let foo: Foo = try request.content.decode(Foo.self)
+                        return self.create(foo: foo)
                     }
-                    .openAPI(custom: \.parameters, [
-                            .value(.init(name: "path", in: .path, description: "path parameter.", required: true, schema: .string)),
-                            .value(.init(name: "query", in: .query, description: "query parameter.", required: true, schema: .string))])
+                    .openAPI(body: .type(Foo.self), contentType: Self
+                        .responseContentType(for: Foo.self))
                 }
             }
-            """#
+            """
         }
     }
+
 
     @Test
     func secondNameParameter() {
@@ -112,7 +142,7 @@ struct DocumentationTests {
             }
             """
         } expansion: {
-            #"""
+            """
             struct TestController {
                 /// - Parameters:
                 ///     - secondName: path parameter.
@@ -128,11 +158,12 @@ struct DocumentationTests {
                         let path: String = try request.parameters.require("path")
                         return self.list(path: path)
                     }
-                    .openAPI(custom: \.parameters, [
-                            .value(.init(name: "path", in: .path, description: "path parameter.", required: true, schema: .string))])
+                    .openAPI(path: [
+                        .init(name: "path", in: .path, description: "path parameter.", required: true, schema: .string)
+                        ])
                 }
             }
-            """#
+            """
         }
     }
 

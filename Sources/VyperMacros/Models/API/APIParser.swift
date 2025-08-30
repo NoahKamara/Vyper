@@ -114,9 +114,10 @@ enum APIParser {
                 return .header
             case "Query":
                 return .query
-//            case "Field": .field
+            case "Cookie":
+                return .cookie
             case "Body":
-                    return .body(arguments?.map({ $0.expression }))
+                return .body
             case "Passthrough":
                 guard let firstArg = arguments?.first else {
                     return .passthrough(nil)

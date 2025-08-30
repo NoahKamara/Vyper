@@ -61,16 +61,22 @@ struct APIRoute: CustomStringConvertible {
             case path
             case header
             case query
-            case field
-            case body([ExprSyntax]?)
+            case cookie
+            case body
             case passthrough(ExprSyntax?)
 
+            var isParameter: Bool {
+                switch self {
+                case .path, .header, .query, .cookie: true
+                case .body, .passthrough: false
+                }
+            }
             var rawLocation: String? {
                 switch self {
                 case .path: "path"
                 case .header: "header"
                 case .query: "query"
-                case .field: "field"
+                case .cookie: "cookie"
                 case .body: "body"
                 case .passthrough: nil
                 }

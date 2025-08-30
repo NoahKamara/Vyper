@@ -135,72 +135,212 @@ enum APIBuilder {
             return funcCall
         }
 
-        // Build base spec .openAPI()
-        if abstract != nil || discussion != nil {
-            // Add OpenAPI modifier
-            funcCall = FunctionCallExprSyntax(
-                callee: MemberAccessExprSyntax(
-                    base: funcCall,
-                    period: .periodToken(leadingTrivia: .newline),
-                    declName: .init(baseName: .identifier("openAPI")),
-                ),
-                argumentList: {
-                    if let abstract {
-                        LabeledExprSyntax(
-                            label: .identifier("summary"),
-                            colon: .colonToken(),
-                            expression: StringLiteralExprSyntax(content: abstract)
-                        )
-                    }
+        var queryParameters = [FunctionCallExprSyntax]()
+        var headerParameters = [FunctionCallExprSyntax]()
+        var pathParameters = [FunctionCallExprSyntax]()
+        var cookieParameters = [FunctionCallExprSyntax]()
 
-                    if let discussion {
+        var body: MemberAccessExprSyntax? = nil
+
+        for parameter in route.parameters {
+            let markup = route.markup.discussionTags?.parameters
+                .first(
+                    where: { $0.name == parameter.name || $0.name == parameter.secondName }
+                )?
+                .contents
+                .map { $0.format() }
+                .joined(separator: "\n")
+
+
+            switch parameter.kind {
+            case .query:
+                queryParameters.append(
+                    buildParameterObject(parameter: parameter, markup: markup)
+                )
+            case .header:
+                headerParameters.append(
+                    buildParameterObject(parameter: parameter, markup: markup)
+                )
+            case .path:
+                pathParameters.append(
+                    buildParameterObject(parameter: parameter, markup: markup)
+                )
+            case .cookie:
+                pathParameters.append(
+                    buildParameterObject(parameter: parameter, markup: markup)
+                )
+            case .body:
+                body = MemberAccessExprSyntax(
+                    base: DeclReferenceExprSyntax(baseName: .identifier(parameter.type)),
+                    name: .keyword(.self)
+                )
+            case .passthrough: break
+            }
+        }
+
+        let response = route.returnType.map(MemberAccessExprSyntax.typeReference)
+        let responseDescription: String? = route.markup.discussionTags?.returns.first?.format()
+
+        let openAPICall = funcCall.call("openAPI") {
+            //        customMethod: <#T##PathItemObject.Method?#>,
+            //        spec: <#T##String?#>,
+            //        tags: <#T##TagObject...#>,
+            if let abstract {
+                LabeledExprSyntax(
+                    label: "summary",
+                    expression: StringLiteralExprSyntax(content: abstract)
+                )
+            }
+
+            if let discussion {
+                LabeledExprSyntax(
+                    label: "discussion",
+                    expression: StringLiteralExprSyntax(content: discussion)
+                )
+            }
+
+            //        operationId: <#T##String?#>,
+            //        externalDocs: <#T##ExternalDocumentationObject?#>,
+            //        query: <#T##OpenAPIParameters?#>,
+
+            // Parameters .openAPI(custom: \.parameters, [...])
+
+            if !queryParameters.isEmpty {
+                LabeledExprSyntax(
+                    label: "query",
+                    expression: ArrayExprSyntax.multiline { queryParameters }
+                )
+            }
+
+            if !headerParameters.isEmpty {
+                LabeledExprSyntax(
+                    label: "header",
+                    expression: ArrayExprSyntax.multiline { headerParameters }
+                )
+            }
+
+            if !pathParameters.isEmpty {
+                LabeledExprSyntax(
+                    label: "path",
+                    expression: ArrayExprSyntax.multiline { pathParameters }
+                )
+            }
+
+            if !cookieParameters.isEmpty {
+                LabeledExprSyntax(
+                    label: "cookies",
+                    expression: ArrayExprSyntax.multiline { cookieParameters }
+                )
+            }
+
+            if let body {
+                LabeledExprSyntax(
+                    label: "body",
+                    expression: FunctionCallExprSyntax.dotCall("type") {
+                        LabeledExprSyntax(expression: body)
+                    }
+                )
+
+                LabeledExprSyntax(
+                    label: "contentType",
+                    expression: FunctionCallExprSyntax.call("Self", "responseContentType") {
                         LabeledExprSyntax(
-                            label: .identifier("discussion"),
-                            colon: .colonToken(),
-                            expression: StringLiteralExprSyntax(content: discussion)
+                            label: "for",
+                            expression: body
                         )
                     }
+                )
+            }
+
+            if let response {
+                LabeledExprSyntax(
+                    label: "response",
+                    expression: response
+                )
+
+                LabeledExprSyntax(
+                    label: "responseContentType",
+                    expression: FunctionCallExprSyntax.call("Self", "responseContentType") {
+                        LabeledExprSyntax(label: "for", expression: response)
+                    }
+                )
+            }
+
+            //        responseHeaders: <#T##OpenAPIParameters?#>,
+
+            if let responseDescription {
+                LabeledExprSyntax(
+                    label: "responseDescription",
+                    expression: StringLiteralExprSyntax(content: responseDescription)
+                )
+            }
+
+//            if let statusCode {
+//                statusCode
+//            }
+            //        statusCode: <#T##ResponsesObject.Key#>,
+            //        links: <#T##[Link : LinkKey]#>,
+            //        callbacks: <#T##[String : ReferenceOr<CallbackObject>]?#>,
+            //        deprecated: <#T##Bool?#>,
+            //        auth: <#T##AuthSchemeObject...#>,
+            //        servers: <#T##[ServerObject]?#>,
+            //        extensions: <#T##SpecificationExtensions#>
+        }
+
+        guard !openAPICall.arguments.isEmpty else {
+            return funcCall
+        }
+
+        return openAPICall
+
+        // Return type .openAPI(custom: \.requestBody, .type(ResponseBodyType.self))
+        let bodyParameters = route.parameters.filter({
+            if case .body = $0.kind { true } else { false }
+        })
+
+        if bodyParameters.count == 1 {
+            funcCall = funcCall.openAPI(
+                keyPath: "requestBody",
+                FunctionCallExprSyntax.dotCall("type") {
+                    LabeledExprSyntax(
+                        expression: MemberAccessExprSyntax(
+                            base: DeclReferenceExprSyntax(baseName: .identifier(bodyParameters[0].type)),
+                            name: .keyword(.self)
+                        )
+                    )
                 }
             )
+        } else if bodyParameters.count > 1 {
+            fatalError("Multiple body parameters not yet supported")
         }
 
         // Parameters .openAPI(custom: \.parameters, [...])
-        if !route.parameters.isEmpty {
-            let parameterObjects: [FunctionCallExprSyntax] = route.parameters
-                .compactMap { parameter in
-                    if case .passthrough = parameter.kind {
-                        return nil
-                    }
-
-                    let parameterMarkup = route.markup.discussionTags?.parameters
-                        .first(
-                            where: { $0.name == parameter.name || $0.name == parameter.secondName }
-                        )?
-                        .contents
-                        .map { $0.format() }
-                        .joined(separator: "\n")
-
-                    return self.buildParameterObject(
-                        parameter: parameter,
-                        markup: parameterMarkup
-                    )
+        let parameterObjects: [FunctionCallExprSyntax] = route.parameters
+            .compactMap { parameter in
+                guard parameter.kind.isParameter else {
+                    return nil
                 }
 
+                let parameterMarkup = route.markup.discussionTags?.parameters
+                    .first(
+                        where: { $0.name == parameter.name || $0.name == parameter.secondName }
+                    )?
+                    .contents
+                    .map { $0.format() }
+                    .joined(separator: "\n")
+
+                return self.buildParameterObject(
+                    parameter: parameter,
+                    markup: parameterMarkup
+                )
+            }
+
+        if !parameterObjects.isEmpty {
             funcCall = funcCall.openAPI(
                 keyPath: "parameters",
-                ArrayExprSyntax(
-                    elementsBuilder: {
-                        parameterObjects
-                            .map { parameterObject in
-                                ArrayElementSyntax(
-                                    expression: FunctionCallExprSyntax.dotCall(
-                                        "value",
-                                        argumentList: { .init(expression: parameterObject) }
-                                    )
-                                )
-                            }
-                    }
-                )
+                ArrayExprSyntax.multiline {
+                    parameterObjects
+                }
             )
         }
 
@@ -216,12 +356,21 @@ enum APIBuilder {
         return funcCall
     }
 
+    private static func buildParameters(_ parameters: [APIRoute.Parameter]) {
+        DictionaryExprSyntax {
+            parameters.map { parameter in
+                DictionaryElementSyntax(
+                    key: StringLiteralExprSyntax(content: parameter.name),
+                    value: buildParameterObject(parameter: parameter, markup: nil)
+                )
+            }
+        }
+    }
+
     private static func buildParameterObject(
         parameter: APIRoute.Parameter,
         markup: String?
     ) -> FunctionCallExprSyntax {
-        let schemaType = self.getOpenAPISchemaType(for: parameter.type)
-
         return FunctionCallExprSyntax(
             callee: MemberAccessExprSyntax(
                 period: .periodToken(),
@@ -252,7 +401,7 @@ enum APIBuilder {
                 }
                 LabeledExprSyntax(
                     label: "schema",
-                    expression: schemaType
+                    expression: self.getOpenAPISchemaType(for: parameter.type)
                 )
             }
         )
@@ -310,20 +459,6 @@ enum APIBuilder {
         }
     }
 
-    private static func getOpenAPISchemaType(for kind: APIRoute.Parameter.Kind)
-        -> FunctionCallExprSyntax
-    {
-        // For now, return a basic string schema
-        // You can enhance this to map Swift types to OpenAPI schemas
-        FunctionCallExprSyntax(
-            callee: MemberAccessExprSyntax(
-                period: .periodToken(),
-                name: .identifier("string")
-            ),
-            argumentList: {}
-        )
-    }
-
     private static func getOpenAPISchemaType(
         for typeIdentifier: String
     ) -> FunctionCallExprSyntax {
@@ -353,6 +488,15 @@ enum APIBuilder {
         if self.isCustomType(typeIdentifier) {
             return self.buildCustomTypeSchema(for: typeIdentifier)
         }
+
+//        return FunctionCallExprSyntax.dotCall("type") {
+//            LabeledExprSyntax(
+//                expression: MemberAccessExprSyntax(
+//                    base: DeclReferenceExprSyntax(baseName: .identifier(typeIdentifier)),
+//                    declName: DeclReferenceExprSyntax(baseName: .identifier("self"))
+//                )
+//            )
+//        }
 
         return FunctionCallExprSyntax(
             calledExpression: MemberAccessExprSyntax(
@@ -442,13 +586,14 @@ enum APIBuilder {
                 } else {
                     throw VyperMacrosError("Header parameters must be optional")
                 }
-            case .field: ExprSyntax(literal: "")
-            case .body(let keyPath):
-                if let keyPath = keyPath?.map({ $0.trimmedDescription }).joined(separator: ", ") {
-                    "request.content.get(at: \(raw: keyPath))"
+            case .cookie:
+                if parameter.isOptional {
+                    "request.cookies[name: \"\(raw: parameter.name)\"]"
                 } else {
-                    "request.content.decode(\(raw: parameter.type).self)"
+                    throw VyperMacrosError("Cookie parameters must be optional")
                 }
+            case .body:
+                "try request.content.decode(\(raw: parameter.type).self)"
             case .passthrough(let expr):
                 if let expr {
                     "request[keyPath: \(raw: expr)]"
@@ -489,6 +634,21 @@ extension FunctionCallExprSyntax {
     ) -> FunctionCallExprSyntax {
         FunctionCallExprSyntax(
             callee: MemberAccessExprSyntax(
+                period: .periodToken(),
+                declName: .init(baseName: .identifier(declName))
+            ),
+            argumentList: argumentList
+        )
+    }
+
+    static func call(
+        _ baseName: String,
+        _ declName: String,
+        @LabeledExprListBuilder argumentList: () -> LabeledExprListSyntax = { [] }
+    ) -> FunctionCallExprSyntax {
+        FunctionCallExprSyntax(
+            callee: MemberAccessExprSyntax(
+                base: DeclReferenceExprSyntax(baseName: .identifier(baseName)),
                 period: .periodToken(leadingTrivia: .newline),
                 declName: .init(baseName: .identifier(declName))
             ),
@@ -525,75 +685,29 @@ extension FunctionCallExprSyntax {
     }
 }
 
-//
-// struct OpenAPIProxy {
-//    struct PathParameter {
-//        let name: String
-//        let description: String?
-//    }
-//
-//    var summary: String?
-//    var description: String?
-//    var pathParameters: [String: PathParameter] = [:]
-//    var parameters: [String: Parameter]
-//
-//    init(summary: String? = nil, description: String? = nil, parameters: [String : Parameter] = [:]) {
-//        self.summary = summary
-//        self.description = description
-//        self.parameters = parameters
-//    }
-//
-//
-//    init(_ route: APIRoute) {
-//        self.init(
-//            summary: route.markup.abstractSection?.paragraph.format(),
-//            description: route.markup.discussionSection?.format()
-//        )
-//
-//        route.markup.discussionTags?.httpParameters
-//
-//        for parameter in route.parameters {
-//            self.parameters[parameter.name] = Parameter(
-//                description: parameter.description
-//            )
-//        }
-//
-//        if let tags = route.markup.discussionTags {
-//            route.parameters
-//            if tags.parameters.contains { $0.name == .path } {
-//                .init(
-//                    label: "path",
-//                    expression: DictionaryExprSyntax(
-//                        content: .init(
-//                            elements: route.parameters
-//                                .filter { $0.kind == .path }
-//                                .map { param in
-//                                        .init(
-//                                            key: .init(
-//                                                expression: ExprSyntax(literal: "\"\(param.name)\"")
-//                                            ),
-//                                            value: .init(
-//                                                expression: MemberAccessExprSyntax(
-//                                                    base: MemberAccessExprSyntax(
-//                                                        base: MemberAccessExprSyntax(
-//                                                            base: IdentifierTypeSyntax(
-//                                                                name: "OpenAPIParameters"
-//                                                            ),
-//                                                            name: "Value"
-//                                                        ),
-//                                                        name: "value"
-//                                                    ),
-//                                                    name: .identifier(param
-//                                                        .type == "Int" ? "int" : "string"
-//                                                    )
-//                                                )
-//                                            )
-//                                        )
-//                                }
-//                        )
-//                    )
-//                ),
-//            }
-//        }
-//    }
-// }
+extension ArrayExprSyntax {
+    static func multiline(
+        @ExprListBuilder
+        elementsBuilder: () -> ExprListSyntax
+    ) -> ArrayExprSyntax {
+        let childTrivia: Trivia = [.newlines(1), .spaces(4)]
+        let elements = elementsBuilder()
+
+        return ArrayExprSyntax(
+            rightSquare: .rightSquareToken(leadingTrivia: elements.isEmpty ? [] : .newline),
+        ) {
+            elements.map { expression in
+                ArrayElementSyntax(leadingTrivia: childTrivia, expression: expression)
+            }
+        }
+    }
+}
+
+extension MemberAccessExprSyntax {
+    static func typeReference(_ type: String) -> Self {
+        MemberAccessExprSyntax(
+            base: DeclReferenceExprSyntax(baseName: .identifier(type)),
+            name: .keyword(.self)
+        )
+    }
+}
