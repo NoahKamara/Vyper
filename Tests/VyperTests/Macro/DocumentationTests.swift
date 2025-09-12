@@ -11,7 +11,7 @@ import Testing
 @Suite("RouterMacro: Documentation", .macros([RouterMacro.self]), .tags(.macro))
 struct DocumentationTests {
     @Test
-    func excluded() {
+    func excludedRouter() {
         assertMacro {
             """
             @Router(traits: .excludeFromDocs)
@@ -38,6 +38,57 @@ struct DocumentationTests {
                     routes.on(.GET) { request in
                         return self.list()
                     }
+                }
+            }
+            """
+        }
+    }
+
+    @Test
+    func excludedRoute() {
+        assertMacro {
+            """
+            @Router
+            struct TestController {
+                /// Lorem ipsum dolor sit amet.
+                @GET(traits: .excludeFromDocs)
+                func list() -> Response {
+                    Response(statusCode: 200)
+                }
+            
+                /// Lorem ipsum dolor sit amet.
+                @POST
+                func create() -> Response {
+                    Response(statusCode: 201)
+                }
+            }
+            """
+        } expansion: {
+            """
+            struct TestController {
+                /// Lorem ipsum dolor sit amet.
+                @GET(traits: .excludeFromDocs)
+                func list() -> Response {
+                    Response(statusCode: 200)
+                }
+
+                /// Lorem ipsum dolor sit amet.
+                @POST
+                func create() -> Response {
+                    Response(statusCode: 201)
+                }
+            }
+
+            extension TestController: RouteCollection {
+                func boot(routes: any RoutesBuilder) throws {
+                    routes.on(.GET) { request in
+                        return self.list()
+                    }
+                    routes.on(.POST) { request in
+                        return self.create()
+                    }
+                    .openAPI(
+                        summary: "Lorem ipsum dolor sit amet.")
                 }
             }
             """

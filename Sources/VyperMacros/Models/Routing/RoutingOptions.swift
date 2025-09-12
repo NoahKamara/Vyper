@@ -41,6 +41,12 @@ class RoutingOptionsParser {
             return RoutingOptions()
         }
 
+        return try parseArguments(arguments.map({ $0 }))
+    }
+
+    static func parseArguments(
+        _ arguments: [LabeledExprSyntax]
+    ) throws(DiagnosticsError) -> RoutingOptions {
         let parser = RoutingOptionsParser()
 
         var diagnostics = [Diagnostic]()

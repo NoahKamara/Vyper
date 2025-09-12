@@ -17,7 +17,7 @@ extension RouterMacro {
         let routeBuilderStatements = try CodeBlockItemListSyntax(
             api.routes.map { route in
                 try CodeBlockItemSyntax(
-                    item: .init(self.buildRoute(route, options: options))
+                    item: .init(self.buildRoute(route, routerOptions: options))
                 )
             }
         )
@@ -54,7 +54,7 @@ extension RouterMacro {
 
     fileprivate static func buildRoute(
         _ route: RouteDescriptor,
-        options: RoutingOptions
+        routerOptions: RoutingOptions
     ) throws -> FunctionCallExprSyntax {
         let parameterBuilders = try route.parameters.map { try self.buildRouteParameterDecoder($0) }
 
@@ -100,7 +100,7 @@ extension RouterMacro {
         )
 
         // Combine Router-level path with route-level path
-        let combinedPath = options.path + route.path
+        let combinedPath = routerOptions.path + route.path
 
         // routes.on(.GET) {} call
         let funcCall = FunctionCallExprSyntax(
@@ -117,7 +117,7 @@ extension RouterMacro {
         }.with(\.trailingClosure, closure)
 
         // dont generate openapi calls when docs disabled
-        guard !options.docs.excludeFromDocs else {
+        guard !(routerOptions.docs.excludeFromDocs || route.options.docs.excludeFromDocs) else {
             return funcCall
         }
 

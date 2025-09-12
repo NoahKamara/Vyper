@@ -33,21 +33,22 @@ extension RouterMacro {
 
     static func parseFunction(_ function: FunctionDeclSyntax) throws -> RouteDescriptor? {
         var method: ExprSyntax? = nil
-        var path: [ExprSyntax] = []
+        var options = RoutingOptions()
 
         for attribute in function.functionAttributes {
             let name = attribute.attributeName.trimmedDescription
             switch name {
             case "GET", "DELETE", "PATCH", "POST", "PUT", "OPTIONS", "HEAD", "TRACE", "CONNECT":
                 method = ExprSyntax(MemberAccessExprSyntax(name: .identifier(name)))
-                if case .argumentList(let list) = attribute.arguments {
-                    path = list.map(\.expression)
+
+                if let list = attribute.arguments?.as(LabeledExprListSyntax.self) {
+                    options = try RoutingOptionsParser.parseArguments(list.map({ $0 }))
                 }
 
             case "HTTP":
                 if case .argumentList(let list) = attribute.arguments {
                     method = list.first?.expression
-                    path = list.dropFirst().map(\.expression)
+                    options = try RoutingOptionsParser.parseArguments(list.dropFirst().map({ $0 }))
                 } else {
                     throw DiagnosticBuilder(for: attribute)
                         .severity(.error)
@@ -78,12 +79,13 @@ extension RouterMacro {
         return try .init(
             name: function.name.text,
             method: method,
-            path: path,
+            path: options.path,
             isThrowing: function.isThrowing,
             isAsync: function.isAsync,
             parameters: function.parameters.map { try self.parseRouteParameter($0) },
             markup: documentationMarkup,
-            returnType: self.parseReturnValue(function.signature.returnClause)
+            returnType: self.parseReturnValue(function.signature.returnClause),
+            options: options
         )
     }
 

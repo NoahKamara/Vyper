@@ -68,6 +68,7 @@ struct RouteDescriptor: CustomStringConvertible {
     let parameters: [Parameter]
     let markup: DocumentationMarkup
     let returnType: String?
+    let options: RoutingOptions
 
     var description: String {
         """
@@ -79,7 +80,8 @@ struct RouteDescriptor: CustomStringConvertible {
           isAsync: '\(self.isAsync)'
           parameters: 
             \(self.parameters.map { "- " + $0.description }.joined(separator: "\n    "))
-          returnType: '\(self.returnType ?? "Void")'
+          returnType: '\(self.returnType ?? "Void")',
+          options: \(options)
         )
         """
     }
@@ -92,7 +94,8 @@ struct RouteDescriptor: CustomStringConvertible {
         isAsync: Bool,
         parameters: [RouteDescriptor.Parameter],
         markup: DocumentationMarkup,
-        returnType: String?
+        returnType: String?,
+        options: RoutingOptions
     ) {
         self.name = name
         self.method = method
@@ -102,6 +105,7 @@ struct RouteDescriptor: CustomStringConvertible {
         self.parameters = parameters
         self.markup = markup
         self.returnType = returnType
+        self.options = options
     }
 }
 
