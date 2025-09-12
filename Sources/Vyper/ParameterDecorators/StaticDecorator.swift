@@ -14,6 +14,7 @@ public struct StaticDecorator<T>: DecoratorProtocol {
 }
 
 public typealias Path<T> = StaticDecorator<T>
+public typealias Query<T> = StaticDecorator<T>
 public typealias Header<T> = StaticDecorator<T>
 public typealias Field<T> = StaticDecorator<T>
 public typealias Body<T> = StaticDecorator<T>
