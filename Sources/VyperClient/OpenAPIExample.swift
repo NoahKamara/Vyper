@@ -12,7 +12,7 @@
 //// and generate the appropriate OpenAPI parameter specifications
 //
 //struct ExampleController: RouteCollection {
-//    func boot(routes: RoutesBuilder) {
+//    func boot(routes: any RoutesBuilder) {
 //        // Your macro should generate this:
 //        routes.on(.GET, "todos", ":id") { request in
 //            let id = try request.parameters.require("id", as: String.self)

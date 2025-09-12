@@ -37,7 +37,7 @@ struct DocumentationTests {
             }
 
             extension TestController: RouteCollection {
-                func boot(routes: RoutesBuilder) throws {
+                func boot(routes: any RoutesBuilder) throws {
                     routes.on(.GET) { request in
                         return self.list()
                     }
@@ -72,7 +72,7 @@ struct DocumentationTests {
             }
 
             extension TestController: RouteCollection {
-                func boot(routes: RoutesBuilder) throws {
+                func boot(routes: any RoutesBuilder) throws {
                     routes.on(.GET) { request in
                         return self.list()
                     }
@@ -122,7 +122,7 @@ struct DocumentationTests {
             }
 
             extension TestController: RouteCollection {
-                func boot(routes: RoutesBuilder) throws {
+                func boot(routes: any RoutesBuilder) throws {
                     routes.on(.GET) { request in
                         let path: String = try request.parameters.require("path")
                         let query: String = try request.query.get(at: "query")
@@ -166,7 +166,7 @@ struct DocumentationTests {
             }
 
             extension TestController: RouteCollection {
-                func boot(routes: RoutesBuilder) throws {
+                func boot(routes: any RoutesBuilder) throws {
                     routes.on(.POST) { request in
                         let foo: Foo = try request.content.decode(Foo.self)
                         return self.create(foo: foo)
@@ -208,7 +208,7 @@ struct DocumentationTests {
             }
 
             extension TestController: RouteCollection {
-                func boot(routes: RoutesBuilder) throws {
+                func boot(routes: any RoutesBuilder) throws {
                     routes.on(.GET) { request in
                         let path: String = try request.parameters.require("path")
                         return self.list(path: path)

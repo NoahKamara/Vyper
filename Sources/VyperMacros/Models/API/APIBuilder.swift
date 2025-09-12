@@ -12,7 +12,7 @@ enum APIBuilder {
     static func build(
         api: API,
         extendedType: some TypeSyntaxProtocol,
-        options: APIOptions
+        options: RoutingOptions
     ) throws -> ExtensionDeclSyntax {
         let routeBuilderStatements = try CodeBlockItemListSyntax(
             api.routes.map { route in
@@ -29,7 +29,10 @@ enum APIBuilder {
                     parameters: [
                         .init(
                             firstName: "routes",
-                            type: IdentifierTypeSyntax(name: "RoutesBuilder")
+                            type: SomeOrAnyTypeSyntax(
+                                someOrAnySpecifier: .identifier("any"),
+                                constraint: IdentifierTypeSyntax(name: "RoutesBuilder")
+                            )
                         ),
                     ]
                 ),
@@ -51,7 +54,7 @@ enum APIBuilder {
 
     private static func buildRoute(
         _ route: APIRoute,
-        options: APIOptions
+        options: RoutingOptions
     ) throws -> FunctionCallExprSyntax {
         let parameterBuilders = try route.parameters.map { try self.buildRouteParameterDecoder($0) }
 
@@ -100,7 +103,7 @@ enum APIBuilder {
         let combinedPath = options.path + route.path
 
         // routes.on(.GET) {} call
-        var funcCall = FunctionCallExprSyntax(
+        let funcCall = FunctionCallExprSyntax(
             calledExpression: MemberAccessExprSyntax(
                 base: DeclReferenceExprSyntax(baseName: .identifier("routes")),
                 period: .periodToken(),
@@ -113,14 +116,9 @@ enum APIBuilder {
             combinedPath.map { LabeledExprSyntax(expression: $0) }
         }.with(\.trailingClosure, closure)
 
-        // Process traits
-        for trait in options.traits {
-            if let memberAccess = trait.as(MemberAccessExprSyntax.self),
-               memberAccess.declName.trimmedDescription == "excludeFromDocs"
-            {
-                // Skip OpenAPI generation for this route
-                return funcCall
-            }
+        // dont generate openapi calls when docs disabled
+        guard !options.docs.excludeFromDocs else {
+            return funcCall
         }
 
         let abstract: String? = route.markup.abstractSection?.paragraph.format()
@@ -128,11 +126,6 @@ enum APIBuilder {
             discussion.content.isEmpty ? nil : discussion.format()
         } else {
             nil
-        }
-
-        // dont generate openapi calls when docs disabled
-        guard !options.excludeFromDocs else {
-            return funcCall
         }
 
         var queryParameters = [FunctionCallExprSyntax]()
@@ -376,6 +369,8 @@ enum APIBuilder {
             "number"
         case "Bool", "Bool?":
             "boolean"
+        case "UUID", "UUID?":
+            "uuid"
         case let type where type.hasSuffix("?") && type.dropLast().hasSuffix("Array"):
             "array"
         case let type where type.hasSuffix("Array"):

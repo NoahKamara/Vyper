@@ -23,8 +23,4 @@ public struct AbstractSection {
     public init(paragraph: Paragraph) {
         self.paragraph = paragraph
     }
-
-    public func format() {
-        paragraph.format()
-    }
 }

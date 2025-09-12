@@ -9,13 +9,6 @@ import Vapor
 
 public protocol Trait: Sendable {}
 
-public struct ExcludeFromDocs: Trait {
-    public init() {}
-}
-
-public extension Trait where Self == ExcludeFromDocs {
-    static var excludeFromDocs: ExcludeFromDocs { .init() }
-}
 
 public protocol RouteModifier: Trait {
     func modify(_ route: Route)

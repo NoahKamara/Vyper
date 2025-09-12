@@ -48,7 +48,7 @@ import Vyper
 //}
 //
 //struct ABCController: RouteCollection {
-//    func boot(routes: RoutesBuilder) {
+//    func boot(routes: any RoutesBuilder) {
 //        routes.on(.ACL, "abc", "def") { request in
 //            let string = try request.parameters.require("string")
 //            let int = try request.parameters.require("int", as: Int.self)

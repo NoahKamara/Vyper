@@ -7,21 +7,6 @@
 import SwiftSyntax
 
 struct API {
-//        /// Attributes to be applied to this endpoint. These take precedence
-//        /// over attributes at the API scope.
-//        let attributes: [EndpointAttribute]
-//        let pathParameters: [String]
-//        /// The name of the function defining this endpoint.
-//        let name: String
-//        let parameters: [EndpointParameter]
-//        let responseType: String?
-//    /// The name of the protocol defining the API.
-//    let name: String
-//    /// The access level of the API (public, internal, etc).
-//    let access: String?
-//    /// Attributes to be applied to every endpoint of this API.
-    ////    let attributes: [EndpointAttribute]
-//
     var name: String
     let routes: [APIRoute]
 

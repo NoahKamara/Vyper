@@ -38,7 +38,7 @@ struct EffectSpecifierTests {
             }
 
             extension TestController: RouteCollection {
-                func boot(routes: RoutesBuilder) throws {
+                func boot(routes: any RoutesBuilder) throws {
                     routes.on(.GET) { request in
                         return self.list()
                     }
@@ -70,7 +70,7 @@ struct EffectSpecifierTests {
             }
 
             extension TestController: RouteCollection {
-                func boot(routes: RoutesBuilder) throws {
+                func boot(routes: any RoutesBuilder) throws {
                     routes.on(.GET) { request in
                         return await self.list()
                     }
@@ -102,7 +102,7 @@ struct EffectSpecifierTests {
             }
 
             extension TestController: RouteCollection {
-                func boot(routes: RoutesBuilder) throws {
+                func boot(routes: any RoutesBuilder) throws {
                     routes.on(.GET) { request in
                         return try self.list()
                     }
@@ -138,7 +138,7 @@ struct EffectSpecifierTests {
             }
 
             extension TestController: RouteCollection {
-                func boot(routes: RoutesBuilder) throws {
+                func boot(routes: any RoutesBuilder) throws {
                     routes.on(.GET) { request in
                         return try await self.list()
                     }

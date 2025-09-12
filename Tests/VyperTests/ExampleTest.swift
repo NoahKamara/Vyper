@@ -135,7 +135,7 @@ func exampleTest() async throws {
         }
 
         extension ExampleRoutes: RouteCollection {
-            func boot(routes: RoutesBuilder) throws {
+            func boot(routes: any RoutesBuilder) throws {
                 routes.on(.GET) { request in
                     return self.todos()
                 }

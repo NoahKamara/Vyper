@@ -28,7 +28,7 @@ struct BodyParameterTests {
             }
 
             extension TestController: RouteCollection {
-                func boot(routes: RoutesBuilder) throws {
+                func boot(routes: any RoutesBuilder) throws {
                     routes.on(.GET) { request in
                         let foo: Foo = try request.content.decode(Foo.self)
                         return self.list(foo: foo)

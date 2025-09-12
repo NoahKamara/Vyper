@@ -41,7 +41,7 @@ struct HTTPMethodDecoratorTests {
             }
 
             extension TestController: RouteCollection {
-                func boot(routes: RoutesBuilder) throws {
+                func boot(routes: any RoutesBuilder) throws {
                     routes.on(.\(method)) { request in
                         return self.list()
                     }
@@ -73,7 +73,7 @@ struct HTTPMethodDecoratorTests {
             }
 
             extension TestController: RouteCollection {
-                func boot(routes: RoutesBuilder) throws {
+                func boot(routes: any RoutesBuilder) throws {
                     routes.on(.\(method)) { request in
                         return self.list()
                     }
@@ -105,7 +105,7 @@ struct HTTPMethodDecoratorTests {
             }
 
             extension TestController: RouteCollection {
-                func boot(routes: RoutesBuilder) throws {
+                func boot(routes: any RoutesBuilder) throws {
                     routes.on(.GET, \(path)) { request in
                         return self.list()
                     }
@@ -137,7 +137,7 @@ struct HTTPMethodDecoratorTests {
             }
 
             extension TestController: RouteCollection {
-                func boot(routes: RoutesBuilder) throws {
+                func boot(routes: any RoutesBuilder) throws {
                     routes.on(.GET, \(path)) { request in
                         return self.list()
                     }

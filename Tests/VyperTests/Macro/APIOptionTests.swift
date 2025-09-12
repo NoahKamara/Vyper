@@ -30,7 +30,7 @@ struct APIOptionTests {
             }
 
             extension TestController: RouteCollection {
-                func boot(routes: RoutesBuilder) throws {
+                func boot(routes: any RoutesBuilder) throws {
                     routes.on(.GET) { request in
                         return self.list()
                     }
@@ -57,7 +57,7 @@ struct APIOptionTests {
             }
 
             extension TestController: RouteCollection {
-                func boot(routes: RoutesBuilder) throws {
+                func boot(routes: any RoutesBuilder) throws {
                     routes.on(.GET) { request in
                         return self.list()
                     }
@@ -87,7 +87,7 @@ struct APIOptionTests {
             }
 
             extension TestController: RouteCollection {
-                func boot(routes: RoutesBuilder) throws {
+                func boot(routes: any RoutesBuilder) throws {
                     routes.on(.GET, "prefix", "route") { request in
                         return self.list()
                     }
