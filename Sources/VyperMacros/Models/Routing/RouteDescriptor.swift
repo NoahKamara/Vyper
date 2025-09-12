@@ -1,22 +1,12 @@
 //
-//  API.swift
+//  Models.swift
 //
 //  Copyright © 2024 Noah Kamara.
 //
 
 import SwiftSyntax
 
-struct API {
-    var name: String
-    let routes: [APIRoute]
-
-    package init(name: String, routes: [APIRoute]) {
-        self.name = name
-        self.routes = routes
-    }
-}
-
-struct APIRoute: CustomStringConvertible {
+struct RouteDescriptor: CustomStringConvertible {
     struct Parameter: CustomStringConvertible {
         let name: String
         let secondName: String?
@@ -25,7 +15,7 @@ struct APIRoute: CustomStringConvertible {
         let kind: Kind
 
         var description: String {
-            "\(name): \(type)\(isOptional ? "?" : "") (\(kind))"
+            "\(self.name): \(self.type)\(self.isOptional ? "?" : "") (\(self.kind))"
         }
 
         package init(
@@ -56,6 +46,7 @@ struct APIRoute: CustomStringConvertible {
                 case .body, .passthrough: false
                 }
             }
+
             var rawLocation: String? {
                 switch self {
                 case .path: "path"
@@ -81,14 +72,14 @@ struct APIRoute: CustomStringConvertible {
     var description: String {
         """
         APIRoute(
-          name: '\(name)'
-          method: '\(method.trimmedDescription)'
-          path: \(path.map({ $0.trimmedDescription }).joined(separator: ", "))
-          isThrowing: '\(isThrowing)'
-          isAsync: '\(isAsync)'
+          name: '\(self.name)'
+          method: '\(self.method.trimmedDescription)'
+          path: \(self.path.map(\.trimmedDescription).joined(separator: ", "))
+          isThrowing: '\(self.isThrowing)'
+          isAsync: '\(self.isAsync)'
           parameters: 
-            \(parameters.map({ "- "+$0.description }).joined(separator: "\n    "))
-          returnType: '\(returnType ?? "Void")'
+            \(self.parameters.map { "- " + $0.description }.joined(separator: "\n    "))
+          returnType: '\(self.returnType ?? "Void")'
         )
         """
     }
@@ -99,7 +90,7 @@ struct APIRoute: CustomStringConvertible {
         path: [ExprSyntax],
         isThrowing: Bool,
         isAsync: Bool,
-        parameters: [APIRoute.Parameter],
+        parameters: [RouteDescriptor.Parameter],
         markup: DocumentationMarkup,
         returnType: String?
     ) {
@@ -113,4 +104,5 @@ struct APIRoute: CustomStringConvertible {
         self.returnType = returnType
     }
 }
+
 

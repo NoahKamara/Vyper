@@ -1,5 +1,5 @@
 //
-//  QueryParameterTests.swift
+//  BodyParameterTests.swift
 //
 //  Copyright © 2024 Noah Kamara.
 //
@@ -8,13 +8,13 @@ import MacroTesting
 import Testing
 @testable import VyperMacros
 
-@Suite("APIMacro: Body Parameter", .macros([APIMacro.self]), .tags(.macro))
+@Suite("RouterMacro: Body Parameter", .macros([RouterMacro.self]), .tags(.macro))
 struct BodyParameterTests {
     @Test
     func fullBody() {
         assertMacro {
             """
-            @API(traits: .excludeFromDocs)
+            @Router(traits: .excludeFromDocs)
             struct TestController {
                 @GET
                 func list(@Body foo: Foo) {}

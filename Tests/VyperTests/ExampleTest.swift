@@ -1,20 +1,19 @@
 //
-//  File.swift
-//  Vyper
+//  ExampleTest.swift
 //
-//  Created by Noah Kamara on 30.08.2025.
+//  Copyright © 2024 Noah Kamara.
 //
 
 import MacroTesting
 import Testing
 @testable import VyperMacros
 
-@Test("Example Test", .macros([APIMacro.self]), .tags(.macro))
+@Test("Example Test", .macros([RouterMacro.self]), .tags(.macro))
 func exampleTest() async throws {
     assertMacro {
         """
         /// Example controller demonstrating Vyper's custom types and API annotations
-        @API
+        @Router
         struct ExampleRoutes {
             /// Retrieves all todos
             /// - Returns: An array of all todo items
@@ -25,7 +24,7 @@ func exampleTest() async throws {
                     Todo(id: 1, title: "Build Vypre", isCompleted: false, createdAt: .now),
                 ]
             }
-        
+
             /// Retrieves a specific todo by its ID
             /// - Parameter id: The unique identifier of the todo to retrieve
             /// - Returns: The todo item with the specified ID
@@ -34,7 +33,7 @@ func exampleTest() async throws {
             func retrieve(@Path todoId id: Int) throws -> Todo {
                 Todo(id: id, title: "Procrastinate", isCompleted: true, createdAt: .distantPast)
             }
-        
+
             /// Searches for todos based on provided filters
             /// - Parameter filters: Search criteria including query, category, and sort options
             /// - Returns: An array of todos matching the search criteria
@@ -46,7 +45,7 @@ func exampleTest() async throws {
                     Todo(id: 1, title: "Build Vypre", isCompleted: false, createdAt: .now),
                 ]
             }
-        
+
             /// Creates a new todo item
             /// - Parameter body: The data for creating the new todo
             /// - Returns: The newly created todo item
@@ -55,7 +54,7 @@ func exampleTest() async throws {
             func create(@Body body: Todo.Create) throws -> Todo {
                 Todo(id: 0, title: body.title, isCompleted: body.isCompleted, createdAt: body.createdAt)
             }
-        
+
             /// Updates an existing todo item
             /// - Parameters:
             ///     - id: The unique identifier of the todo to update

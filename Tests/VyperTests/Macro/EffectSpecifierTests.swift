@@ -1,10 +1,8 @@
 //
-//  HTTPMethodDecoratorTests 2.swift
-//  Vyper
+//  EffectSpecifierTests.swift
 //
-//  Created by Noah Kamara on 23.08.2025.
+//  Copyright © 2024 Noah Kamara.
 //
-
 
 import MacroTesting
 import Testing
@@ -14,13 +12,13 @@ extension Tag {
     @Tag static var macro: Self
 }
 
-@Suite("APIMacro: Effect Specifiers", .macros([APIMacro.self]), .tags(.macro))
+@Suite("RouterMacro: Effect Specifiers", .macros([RouterMacro.self]), .tags(.macro))
 struct EffectSpecifierTests {
     @Test
     func basic() {
         assertMacro {
             """
-            @API
+            @Router
             struct TestController {
                 @GET
                 func list() -> Response {
@@ -52,7 +50,7 @@ struct EffectSpecifierTests {
     func async() {
         assertMacro {
             """
-            @API
+            @Router
             struct TestController {
                 @GET
                 func list() async -> Response {
@@ -84,7 +82,7 @@ struct EffectSpecifierTests {
     func throwing() {
         assertMacro {
             """
-            @API
+            @Router
             struct TestController {
                 @GET
                 func list() throws -> Response {
@@ -116,7 +114,7 @@ struct EffectSpecifierTests {
     func asyncThrowing() {
         assertMacro {
             """
-            @API
+            @Router
             struct TestController {
                 @GET
                 func list() async throws -> Response {

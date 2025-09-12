@@ -1,5 +1,5 @@
 //
-//  APIParser.swift
+//  RouterMacro+Parser.swift
 //
 //  Copyright © 2024 Noah Kamara.
 //
@@ -7,7 +7,7 @@
 import SwiftDiagnostics
 import SwiftSyntax
 
-enum APIParser {
+extension RouterMacro {
     struct ParsingError: Error, CustomStringConvertible {
         let message: String
 
@@ -20,18 +20,18 @@ enum APIParser {
         }
     }
 
-    static func parse(_ declaration: some DeclSyntaxProtocol) throws -> API {
+    static func parseRouter(_ declaration: some DeclSyntaxProtocol) throws -> RouterDescriptor {
         guard let structDecl = declaration.as(StructDeclSyntax.self) else {
             throw ParsingError("APIs must be structs for now")
         }
 
-        return try API(
+        return try RouterDescriptor(
             name: structDecl.name.text,
             routes: structDecl.functions.compactMap { try self.parseFunction($0) }
         )
     }
 
-    static func parseFunction(_ function: FunctionDeclSyntax) throws -> APIRoute? {
+    static func parseFunction(_ function: FunctionDeclSyntax) throws -> RouteDescriptor? {
         var method: ExprSyntax? = nil
         var path: [ExprSyntax] = []
 
@@ -87,7 +87,7 @@ enum APIParser {
         )
     }
 
-    private static func parseReturnValue(_ result: ReturnClauseSyntax?) -> String? {
+    fileprivate static func parseReturnValue(_ result: ReturnClauseSyntax?) -> String? {
         guard let result else { return nil }
 
         let returnType = result.type.trimmedDescription
@@ -100,10 +100,10 @@ enum APIParser {
         return returnType
     }
 
-    private static func parseRouteParameter(
+    fileprivate static func parseRouteParameter(
         _ parameter: FunctionParameterSyntax
-    ) throws -> APIRoute.Parameter {
-        let kinds: [APIRoute.Parameter.Kind] = parameter.attributes.compactMap { attr in
+    ) throws -> RouteDescriptor.Parameter {
+        let kinds: [RouteDescriptor.Parameter.Kind] = parameter.attributes.compactMap { attr in
             let attribute = attr.as(AttributeSyntax.self)
             let arguments = attribute?.arguments?.as(LabeledExprListSyntax.self)
 
@@ -144,7 +144,7 @@ enum APIParser {
             (parameter.type.trimmedDescription, false)
         }
 
-        return APIRoute.Parameter(
+        return RouteDescriptor.Parameter(
             name: parameter.firstName.text,
             secondName: parameter.secondName?.text,
             type: type,

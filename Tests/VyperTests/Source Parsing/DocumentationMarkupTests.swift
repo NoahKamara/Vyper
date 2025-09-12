@@ -1,13 +1,11 @@
 //
-//  DocumentationParserTests.swift
-//  VyperOpenAPI
+//  DocumentationMarkupTests.swift
 //
-//  Created by Noah Kamara on 24.08.2025.
+//  Copyright © 2024 Noah Kamara.
 //
 
-
-import Testing
 import InlineSnapshotTesting
+import Testing
 @testable import VyperMacros
 
 extension Tag {
@@ -22,7 +20,6 @@ struct DocumentationMarkupTests {
         Lorem ipsum dolor sit amet.
         """)
 
-        
         assertInlineSnapshot(of: documentation, as: .json) {
             """
             {
@@ -53,7 +50,6 @@ struct DocumentationMarkupTests {
             """
         }
     }
-
 
     @Test("Standalone Parameter")
     func standaloneParameter() async throws {
@@ -192,7 +188,7 @@ struct DocumentationMarkupTests {
     @Test("Throws")
     func throwsDescription() async throws {
         let documentation = DocumentationMarkup(text: """
-        
+
         - Throws: some error
         """)
 
@@ -217,7 +213,7 @@ struct DocumentationMarkupTests {
     @Test("Throws multiple")
     func multipleThrowsDescription() async throws {
         let documentation = DocumentationMarkup(text: """
-        
+
         - Throws: some error
         - Throws: some other error
         """)

@@ -8,13 +8,13 @@ import MacroTesting
 import Testing
 @testable import VyperMacros
 
-@Suite("APIMacro: Path Parameter", .macros([APIMacro.self]), .tags(.macro))
+@Suite("RouterMacro: Path Parameter", .macros([RouterMacro.self]), .tags(.macro))
 struct PathParameterTests {
     @Test
     func optionalParameter() {
         assertMacro {
             """
-            @API(traits: .excludeFromDocs)
+            @Router(traits: .excludeFromDocs)
             struct TestController {
                 @GET("users", ":id")
                 func getUser(@Path id: String) -> Response {
@@ -47,7 +47,7 @@ struct PathParameterTests {
     func requiredParameter() {
         assertMacro {
             """
-            @API(traits: .excludeFromDocs)
+            @Router(traits: .excludeFromDocs)
             struct TestController {
                 @GET("users", ":id")
                 func getUser(@Path id: String) -> Response {
@@ -80,7 +80,7 @@ struct PathParameterTests {
     func convertibleParameter() {
         assertMacro {
             """
-            @API(traits: .excludeFromDocs)
+            @Router(traits: .excludeFromDocs)
             struct TestController {
                 @GET(":foo", ":bar")
                 func list(@Path foo: Int) -> Response {

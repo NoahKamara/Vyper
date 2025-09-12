@@ -1,5 +1,5 @@
 //
-//  APIOptionTests.swift
+//  RoutingOptionTests.swift
 //
 //  Copyright © 2024 Noah Kamara.
 //
@@ -8,13 +8,13 @@ import MacroTesting
 import Testing
 @testable import VyperMacros
 
-@Suite("APIMacro: Options", .macros([APIMacro.self]), .tags(.macro))
-struct APIOptionTests {
+@Suite("RouterMacro: Options", .macros([RouterMacro.self]), .tags(.macro))
+struct RoutingOptionTests {
     @Test
     func excludeFromDocs() {
         assertMacro {
             """
-            @API(traits: .excludeFromDocs)
+            @Router(traits: .excludeFromDocs)
             struct TestController {
                 /// Lorem ipsum dolor sit amet.
                 @GET
@@ -41,7 +41,7 @@ struct APIOptionTests {
 
         assertMacro {
             """
-            @API
+            @Router
             struct TestController {
                 /// Lorem ipsum dolor sit amet.
                 @GET
@@ -73,7 +73,7 @@ struct APIOptionTests {
     func prefixPath() {
         assertMacro {
             """
-            @API("prefix")
+            @Router("prefix")
             struct TestController {
                 @GET("route")
                 func list() -> Response {}

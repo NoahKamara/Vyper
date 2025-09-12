@@ -8,13 +8,13 @@ import MacroTesting
 import Testing
 @testable import VyperMacros
 
-@Suite("APIMacro: Query Parameter", .macros([APIMacro.self]), .tags(.macro))
+@Suite("RouterMacro: Query Parameter", .macros([RouterMacro.self]), .tags(.macro))
 struct QueryParameterTests {
     @Test
     func base() {
         assertMacro {
             """
-            @API(traits: .excludeFromDocs)
+            @Router(traits: .excludeFromDocs)
             struct TestController {
                 @GET(":foo", ":bar")
                 func list(@Query foo: String, @Query bar baz: Int) -> Response {
@@ -48,7 +48,7 @@ struct QueryParameterTests {
     func optionalParameter() {
         assertMacro {
             """
-            @API(traits: .excludeFromDocs)
+            @Router(traits: .excludeFromDocs)
             struct TestController {
                 @GET(":foo", ":bar")
                 func list(@Query foo: String?, @Query bar: Int?) -> Response {
@@ -82,7 +82,7 @@ struct QueryParameterTests {
     func requiredParameter() {
         assertMacro {
             """
-            @API(traits: .excludeFromDocs)
+            @Router(traits: .excludeFromDocs)
             struct TestController {
                 @GET(":foo", ":bar")
                 func list(@Query foo: String) -> Response {
@@ -115,7 +115,7 @@ struct QueryParameterTests {
     func convertibleParameter() {
         assertMacro {
             """
-            @API(traits: .excludeFromDocs)
+            @Router(traits: .excludeFromDocs)
             struct TestController {
                 @GET(":foo", ":bar")
                 func list(@Query foo: Int) -> Response {

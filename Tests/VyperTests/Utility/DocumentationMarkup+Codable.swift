@@ -1,14 +1,12 @@
 //
-//  DocumentationMarkupCodableTests.swift
-//  VyperOpenAPITests
+//  DocumentationMarkup+Codable.swift
 //
-//  Created by Noah Kamara on 24.08.2025.
-//
-//  This file provides Codable implementations for all DocumentationMarkup-related structs
+//  Copyright © 2024 Noah Kamara.
 //
 
 import Foundation
-//import Markdown
+
+// import Markdown
 import SymbolKit
 @testable import VyperMacros
 
@@ -77,7 +75,7 @@ extension TaggedComponents: Encodable {
 }
 
 extension KeyedEncodingContainerProtocol {
-    mutating func encodeIfNotEmpty<T: Encodable>(_ value: [T], forKey key: Key) throws {
+    mutating func encodeIfNotEmpty(_ value: [some Encodable], forKey key: Key) throws {
         if !value.isEmpty {
             try encode(value, forKey: key)
         }
@@ -111,6 +109,7 @@ extension Return: Encodable {
         case contents
         case range
     }
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         let contents = contents.map { $0.format() }
@@ -219,4 +218,3 @@ extension ReturnsSection: Encodable {
         try container.encode(contents)
     }
 }
-

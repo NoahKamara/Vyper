@@ -1,21 +1,19 @@
 //
-//  Extensions.swift
-//  Vyper
+//  RouteCollection++.swift
 //
-//  Created by Noah Kamara on 30.08.2025.
+//  Copyright © 2024 Noah Kamara.
 //
 
-import VaporToOpenAPI
 import Vapor
+import VaporToOpenAPI
 
-extension RouteCollection {
-    public static func responseContentType(for type: Any.Type) -> MediaType {
+public extension RouteCollection {
+    static func responseContentType(for type: Any.Type) -> MediaType {
         switch type {
         case let custom as CustomContentType.Type:
-            return custom.contentType
+            custom.contentType
         default:
-            return .application(.json)
+            .application(.json)
         }
     }
 }
-

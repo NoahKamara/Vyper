@@ -1,10 +1,8 @@
 //
 //  DocumentationTrait.swift
-//  Vyper
 //
-//  Created by Noah Kamara on 12.09.2025.
+//  Copyright © 2024 Noah Kamara.
 //
-
 
 public struct DocumentationTrait: Trait {
     public init() {}

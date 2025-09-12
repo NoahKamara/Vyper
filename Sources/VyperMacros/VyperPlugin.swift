@@ -11,6 +11,6 @@ import SwiftSyntaxMacros
 struct VyperPlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
         DecoratorMacro.self,
-        APIMacro.self,
+        RouterMacro.self,
     ]
 }

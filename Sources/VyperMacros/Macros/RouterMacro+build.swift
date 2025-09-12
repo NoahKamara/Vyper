@@ -1,5 +1,5 @@
 //
-//  APIBuilder.swift
+//  RouterMacro+APIBuilder.swift
 //
 //  Copyright © 2024 Noah Kamara.
 //
@@ -8,9 +8,9 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
-enum APIBuilder {
-    static func build(
-        api: API,
+extension RouterMacro {
+    static func buildRouteCollection(
+        api: RouterDescriptor,
         extendedType: some TypeSyntaxProtocol,
         options: RoutingOptions
     ) throws -> ExtensionDeclSyntax {
@@ -52,8 +52,8 @@ enum APIBuilder {
         )
     }
 
-    private static func buildRoute(
-        _ route: APIRoute,
+    fileprivate static func buildRoute(
+        _ route: RouteDescriptor,
         options: RoutingOptions
     ) throws -> FunctionCallExprSyntax {
         let parameterBuilders = try route.parameters.map { try self.buildRouteParameterDecoder($0) }
@@ -99,7 +99,7 @@ enum APIBuilder {
             })
         )
 
-        // Combine API-level path with route-level path
+        // Combine Router-level path with route-level path
         let combinedPath = options.path + route.path
 
         // routes.on(.GET) {} call
@@ -315,8 +315,8 @@ enum APIBuilder {
         return openAPICall
     }
 
-    private static func buildParameterObject(
-        parameter: APIRoute.Parameter,
+    fileprivate static func buildParameterObject(
+        parameter: RouteDescriptor.Parameter,
         markup: String?
     ) -> FunctionCallExprSyntax {
         FunctionCallExprSyntax(
@@ -355,7 +355,7 @@ enum APIBuilder {
         )
     }
 
-    private static func getOpenAPISchemaType(
+    fileprivate static func getOpenAPISchemaType(
         for typeIdentifier: String
     ) -> FunctionCallExprSyntax {
         // Map Swift types to OpenAPI schema types
@@ -405,7 +405,7 @@ enum APIBuilder {
         )
     }
 
-    private static func isCustomType(_ typeName: String) -> Bool {
+    fileprivate static func isCustomType(_ typeName: String) -> Bool {
         // List of known Swift standard library types
         let standardTypes: Set<String> = [
             "String", "Int", "Int8", "Int16", "Int32", "Int64", "UInt", "UInt8", "UInt16", "UInt32",
@@ -421,7 +421,7 @@ enum APIBuilder {
         return !standardTypes.contains(cleanType)
     }
 
-    private static func buildCustomTypeSchema(for typeName: String) -> FunctionCallExprSyntax {
+    fileprivate static func buildCustomTypeSchema(for typeName: String) -> FunctionCallExprSyntax {
         // Remove optional wrapper for the schema name
         let cleanType = typeName.replacingOccurrences(of: "?", with: "")
 
@@ -456,8 +456,8 @@ enum APIBuilder {
          */
     }
 
-    private static func buildRouteParameterDecoder(
-        _ parameter: APIRoute.Parameter
+    fileprivate static func buildRouteParameterDecoder(
+        _ parameter: RouteDescriptor.Parameter
     ) throws -> VariableDeclSyntax {
         let initializerExpression: ExprSyntax =
             switch parameter.kind {

@@ -1,12 +1,8 @@
-/*
- This source file is part of the Swift.org open source project
-
- Copyright (c) 2021-2024 Apple Inc. and the Swift project authors
- Licensed under Apache License v2.0 with Runtime Library Exception
-
- See https://swift.org/LICENSE.txt for license information
- See https://swift.org/CONTRIBUTORS.txt for Swift project authors
-*/
+//
+//  Return.swift
+//
+//  Copyright © 2024 Noah Kamara.
+//
 
 public import Markdown
 
@@ -16,7 +12,7 @@ public struct Return {
     public var contents: [any Markup]
     /// The text range where this return value was parsed.
     var range: SourceRange?
-    
+
     /// Initialize a value to describe documentation about a symbol's return value.
     /// - Parameters:
     ///   - contents: The content that describe the return value for this symbol.
@@ -35,7 +31,7 @@ public struct Return {
     }
 
     public func format() -> String {
-        contents.reduce(into: "") { partialResult, content in
+        self.contents.reduce(into: "") { partialResult, content in
             partialResult += content.format()
         }
     }

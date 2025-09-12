@@ -1,14 +1,12 @@
 //
 //  Trait.swift
-//  Vyper
 //
-//  Created by Noah Kamara on 28.08.2025.
+//  Copyright © 2024 Noah Kamara.
 //
 
 import Vapor
 
 public protocol Trait: Sendable {}
-
 
 public protocol RouteModifier: Trait {
     func modify(_ route: Route)

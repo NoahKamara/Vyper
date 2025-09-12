@@ -1,23 +1,20 @@
 //
-//  HTTPMethodDecoratorTests 2.swift
-//  Vyper
+//  DocumentationTests.swift
 //
-//  Created by Noah Kamara on 23.08.2025.
+//  Copyright © 2024 Noah Kamara.
 //
-
-
 
 import MacroTesting
 import Testing
 @testable import VyperMacros
 
-@Suite("APIMacro: Documentation", .macros([APIMacro.self]), .tags(.macro))
+@Suite("RouterMacro: Documentation", .macros([RouterMacro.self]), .tags(.macro))
 struct DocumentationTests {
     @Test
     func excluded() {
         assertMacro {
             """
-            @API(traits: .excludeFromDocs)
+            @Router(traits: .excludeFromDocs)
             struct TestController {
                 /// Lorem ipsum dolor sit amet.
                 @GET
@@ -47,12 +44,11 @@ struct DocumentationTests {
         }
     }
 
-
     @Test
     func abstract() {
         assertMacro {
             """
-            @API
+            @Router
             struct TestController {
                 /// Lorem ipsum dolor sit amet.
                 @GET
@@ -88,7 +84,7 @@ struct DocumentationTests {
     func parameters() {
         assertMacro {
             """
-            @API
+            @Router
             struct TestController {
                 /// - Parameters:
                 ///     - path: path parameter.
@@ -146,7 +142,7 @@ struct DocumentationTests {
     func body() {
         assertMacro {
             """
-            @API
+            @Router
             struct TestController {
                 /// - Parameters foo: the foo object to create
                 @POST
@@ -181,12 +177,11 @@ struct DocumentationTests {
         }
     }
 
-
     @Test
     func secondNameParameter() {
         assertMacro {
             """
-            @API
+            @Router
             struct TestController {
                 /// - Parameters:
                 ///     - secondName: path parameter.
@@ -233,7 +228,7 @@ struct DocumentationTests {
 //            """
 //            {
 //              "discussionSection" : [
-//            
+//
 //              ],
 //              "discussionTags" : {
 //                "parameters" : [
@@ -266,7 +261,7 @@ struct DocumentationTests {
 //                "Lorem ipsum dolor sit amet."
 //              ],
 //              "discussionSection" : [
-//            
+//
 //              ],
 //              "discussionTags" : {
 //                "parameters" : [
@@ -302,7 +297,7 @@ struct DocumentationTests {
 //            """
 //            {
 //              "discussionSection" : [
-//            
+//
 //              ],
 //              "discussionTags" : {
 //                "parameters" : [
@@ -332,7 +327,7 @@ struct DocumentationTests {
 //            """
 //            {
 //              "discussionSection" : [
-//            
+//
 //              ],
 //              "discussionTags" : {
 //                "parameters" : [
@@ -360,7 +355,7 @@ struct DocumentationTests {
 //    @Test("Throws")
 //    func throwsDescription() async throws {
 //        let documentation = DocumentationMarkup(text: """
-//        
+//
 //        - Throws: some error
 //        """)
 //
@@ -368,7 +363,7 @@ struct DocumentationTests {
 //            """
 //            {
 //              "discussionSection" : [
-//            
+//
 //              ],
 //              "discussionTags" : {
 //                "throws" : [
@@ -385,7 +380,7 @@ struct DocumentationTests {
 //    @Test("Throws multiple")
 //    func multipleThrowsDescription() async throws {
 //        let documentation = DocumentationMarkup(text: """
-//        
+//
 //        - Throws: some error
 //        - Throws: some other error
 //        """)
@@ -394,7 +389,7 @@ struct DocumentationTests {
 //            """
 //            {
 //              "discussionSection" : [
-//            
+//
 //              ],
 //              "discussionTags" : {
 //                "throws" : [
@@ -421,7 +416,7 @@ struct DocumentationTests {
 //            """
 //            {
 //              "discussionSection" : [
-//            
+//
 //              ],
 //              "discussionTags" : {
 //                "returns" : [
@@ -447,7 +442,7 @@ struct DocumentationTests {
 //            #"""
 //            {
 //              "discussionSection" : [
-//            
+//
 //              ],
 //              "discussionTags" : {
 //                "returns" : [
@@ -463,5 +458,4 @@ struct DocumentationTests {
 //            """#
 //        }
 //    }
-
 }

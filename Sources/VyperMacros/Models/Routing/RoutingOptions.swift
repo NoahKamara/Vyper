@@ -1,85 +1,11 @@
 //
-//  APIMacro.swift
+//  RoutingOptions.swift
 //
 //  Copyright © 2024 Noah Kamara.
 //
 
 import SwiftDiagnostics
 import SwiftSyntax
-import SwiftSyntaxMacros
-
-package struct APIMacro: ExtensionMacro {
-    package static func expansion(
-        of node: AttributeSyntax,
-        attachedTo declaration: some DeclGroupSyntax,
-        providingExtensionsOf type: some TypeSyntaxProtocol,
-        conformingTo protocols: [TypeSyntax],
-        in context: some MacroExpansionContext
-    ) throws -> [ExtensionDeclSyntax] {
-        let api = try APIParser.parse(declaration)
-
-        let routingOptions = try RoutingOptionsParser.parseArguments(of: node)
-
-        let options = try parseOptions(from: node)
-
-        let conformanceExtension = try APIBuilder.build(
-            api: api,
-            extendedType: type,
-            options: routingOptions
-        )
-        return [conformanceExtension]
-    }
-
-    static func parseOptions(from node: AttributeSyntax) throws -> APIOptions {
-        var options = APIOptions()
-
-        guard let arguments = node.arguments?.as(LabeledExprListSyntax.self) else {
-            return APIOptions()
-        }
-
-        var isParsingTraits = false
-        var pathComponents: [ExprSyntax] = []
-
-        for argument in arguments {
-            let builder = DiagnosticBuilder(for: argument)
-                .messageID(domain: "vyper", id: "api.invalidOption")
-
-            if argument.label?.text == "traits" {
-                isParsingTraits = true
-            }
-
-            guard isParsingTraits else {
-                pathComponents.append(argument.expression)
-                continue
-            }
-
-            guard let expression = argument.expression.as(MemberAccessExprSyntax.self) else {
-                continue
-            }
-
-            if expression.declName.trimmedDescription == "excludeFromDocs" {
-                options.documentation.excludeFromDocs = true
-                continue
-            }
-
-            throw
-                builder
-                .message("Unknown trait option: \(expression.declName.trimmedDescription).")
-                .build()
-        }
-
-        options.path = pathComponents
-
-        return options
-    }
-}
-
-
-struct APIOptions {
-    var excludeFromDocs: Bool { documentation.excludeFromDocs }
-    var path: [ExprSyntax] = []
-    var documentation: DocumentationTraits = .init()
-}
 
 struct RoutingOptions {
     let path: [ExprSyntax]
@@ -89,6 +15,15 @@ struct RoutingOptions {
         self.path = path
         self.docs = docs
     }
+}
+
+struct Traits {
+    var documentation: DocumentationTraits
+}
+
+struct DocumentationTraits {
+    var excludeFromDocs: Bool = false
+    var tags: [DeclReferenceExprSyntax]?
 }
 
 class RoutingOptionsParser {
@@ -139,10 +74,10 @@ class RoutingOptionsParser {
 
     private func parseArgument(_ argument: LabeledExprListSyntax.Element) -> ParseResultKind {
         if argument.label?.text == "traits" {
-            isParsingTraits = true
+            self.isParsingTraits = true
         }
 
-        guard isParsingTraits else {
+        guard self.isParsingTraits else {
             self.path.append(argument.expression)
             return .handled
         }
@@ -178,20 +113,11 @@ class RoutingOptionsParser {
 
     private func parseOptions(name: String, arguments: LabeledExprListSyntax) -> ParseResultKind {
         if name == "tag" {
-            tags = arguments
-                .compactMap({ $0.expression.as(MemberAccessExprSyntax.self)?.declName })
+            self.tags = arguments
+                .compactMap { $0.expression.as(MemberAccessExprSyntax.self)?.declName }
             return .handled
         }
 
         return .notHandled
     }
-}
-
-struct Traits {
-    var documentation: DocumentationTraits
-}
-
-struct DocumentationTraits {
-    var excludeFromDocs: Bool = false
-    var tags: [DeclReferenceExprSyntax]? = nil
 }

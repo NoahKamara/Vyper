@@ -8,7 +8,7 @@ import Foundation
 import Vyper
 
 /// Example controller demonstrating Vyper's custom types and API annotations
-@API
+@Router
 struct CustomTypesController {
     /// Retrieves all todos
     /// - Returns: An array of all todo items

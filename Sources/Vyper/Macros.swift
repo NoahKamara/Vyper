@@ -10,9 +10,9 @@ import Vapor
 // MARK: Protocol attributes
 
 @attached(extension, conformances: RouteCollection, names: named(boot))
-public macro API(_ path: PathComponent..., traits: Trait...) = #externalMacro(
+public macro Router(_ path: PathComponent..., traits: Trait...) = #externalMacro(
     module: "VyperMacros",
-    type: "APIMacro"
+    type: "RouterMacro"
 )
 
 // MARK: Function or Protocol attributes

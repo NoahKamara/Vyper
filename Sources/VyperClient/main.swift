@@ -8,9 +8,8 @@ import Vapor
 import VaporToOpenAPI
 import Vyper
 
-
 //
-//actor TodoStore: GlobalActor {
+// actor TodoStore: GlobalActor {
 //    static let shared = TodoStore()
 //
 //    private var todos: [Todo] = [
@@ -30,24 +29,24 @@ import Vyper
 //        guard id >= 0, id < self.todos.count else { return nil }
 //        return self.todos[id].toDto(id: id)
 //    }
-//}
+// }
 //
-//struct Todo: Codable {
+// struct Todo: Codable {
 //    let title: String
 //    let isChecked: Bool
 //
 //    func toDto(id: Int) -> TodoDto {
 //        TodoDto(id: id, title: self.title, isChecked: self.isChecked)
 //    }
-//}
+// }
 //
-//struct TodoDto: Codable, Content {
+// struct TodoDto: Codable, Content {
 //    let id: Int
 //    let title: String
 //    let isChecked: Bool
-//}
+// }
 //
-//struct ABCController: RouteCollection {
+// struct ABCController: RouteCollection {
 //    func boot(routes: any RoutesBuilder) {
 //        routes.on(.ACL, "abc", "def") { request in
 //            let string = try request.parameters.require("string")
@@ -68,7 +67,8 @@ import Vyper
 ////            style: <#T##ParameterObject.Style?#>,
 ////            explode: <#T##Bool?#>,
 ////            allowReserved: <#T##Bool?#>,
-////            schema: ReferenceOr<SchemaObject>.decodeSchema(<#T##type: any Decodable.Type##any Decodable.Type#>, into: &<#T##ComponentsMap<SchemaObject>#>),
+////            schema: ReferenceOr<SchemaObject>.decodeSchema(<#T##type: any Decodable.Type##any
+/// Decodable.Type#>, into: &<#T##ComponentsMap<SchemaObject>#>),
 ////            example: <#T##AnyValue?#>,
 ////            examples: <#T##ComponentsMap<ExampleObject>?#>,
 ////            content: <#T##ContentObject?#>
@@ -109,17 +109,17 @@ import Vyper
 //        let store = TodoStore()
 //        return await store.allTodos()
 //    }
-//}
-//Route().openAPI(custom: \.responses, [
+// }
+// Route().openAPI(custom: \.responses, [
 //    .default: ReferenceOr<ResponseObject>.value(.init(
 //        description: <#T##String#>,
 //        headers: <#T##ComponentsMap<HeaderObject>?#>,
 //        content: <#T##ContentObject?#>,
 //        links: <#T##ComponentsMap<LinkObject>?#>
 //    ))
-//])
+// ])
 //
-//Route().response(body: <#T##OpenAPIBody?#>, contentType: <#T##MediaType...##MediaType#>)
+// Route().response(body: <#T##OpenAPIBody?#>, contentType: <#T##MediaType...##MediaType#>)
 //    .openAPI(
 //        customMethod: <#T##PathItemObject.Method?#>,
 //        spec: <#T##String?#>,
@@ -147,8 +147,8 @@ import Vyper
 //        extensions: <#T##SpecificationExtensions#>
 //    )
 
-//@API
-//struct TestController {
+// @Router
+// struct TestController {
 ////    let store = TodoStore()
 //
 //    //    @HTTP(.GET, .anything)
@@ -167,4 +167,4 @@ import Vyper
 //
 //    //    @GET
 //    //    func index() -> [Todo]
-//}
+// }

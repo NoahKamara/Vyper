@@ -1,10 +1,8 @@
 //
-//  Decorated.swift
-//  Vyper
+//  StaticDecorator.swift
 //
-//  Created by Noah Kamara on 23.08.2025.
+//  Copyright © 2024 Noah Kamara.
 //
-
 
 @propertyWrapper
 public struct StaticDecorator<T>: DecoratorProtocol {

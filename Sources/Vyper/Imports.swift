@@ -1,10 +1,8 @@
 //
-//  File.swift
-//  Vyper
+//  Imports.swift
 //
-//  Created by Noah Kamara on 30.08.2025.
+//  Copyright © 2024 Noah Kamara.
 //
 
 @_exported import Vapor
 @_exported import VaporToOpenAPI
-

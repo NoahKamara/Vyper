@@ -8,7 +8,7 @@ import MacroTesting
 import Testing
 @testable import VyperMacros
 
-@Suite("APIMacro: HTTPMethod Decorator", .macros([APIMacro.self]), .tags(.macro))
+@Suite("RouterMacro: HTTPMethod Decorator", .macros([RouterMacro.self]), .tags(.macro))
 struct HTTPMethodDecoratorTests {
     static let httpMethods = [
         "GET", "DELETE", "PATCH", "POST", "PUT", "OPTIONS", "HEAD", "TRACE", "CONNECT",
@@ -23,7 +23,7 @@ struct HTTPMethodDecoratorTests {
     func basicHTTP(method: String) {
         assertMacro {
             """
-            @API(traits: .excludeFromDocs)
+            @Router(traits: .excludeFromDocs)
             struct TestController {
                 @HTTP(.\(method))
                 func list() -> Response {
@@ -55,7 +55,7 @@ struct HTTPMethodDecoratorTests {
     func methodHelper(method: String) {
         assertMacro {
             """
-            @API(traits: .excludeFromDocs)
+            @Router(traits: .excludeFromDocs)
             struct TestController {
                 @\(method)
                 func list() -> Response {
@@ -87,7 +87,7 @@ struct HTTPMethodDecoratorTests {
     func path(path: String) {
         assertMacro {
             """
-            @API(traits: .excludeFromDocs)
+            @Router(traits: .excludeFromDocs)
             struct TestController {
                 @HTTP(.GET, \(path))
                 func list() -> Response {
@@ -119,7 +119,7 @@ struct HTTPMethodDecoratorTests {
     func methodHelperPath(path: String) {
         assertMacro {
             """
-            @API(traits: .excludeFromDocs)
+            @Router(traits: .excludeFromDocs)
             struct TestController {
                 @GET(\(path))
                 func list() -> Response {

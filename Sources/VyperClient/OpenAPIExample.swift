@@ -1,17 +1,23 @@
+//
+//  OpenAPIExample.swift
+//
+//  Copyright © 2024 Noah Kamara.
+//
+
 ////
 ////  OpenAPIExample.swift
 ////
 ////  Copyright © 2024 Noah Kamara.
 ////
 //
-//import Vapor
-//import VaporToOpenAPI
+// import Vapor
+// import VaporToOpenAPI
 //
 //// This is how your macro should generate the OpenAPI syntax
 //// The macro should parse the @OpenAPI(path: .type(String.self)) decorator
 //// and generate the appropriate OpenAPI parameter specifications
 //
-//struct ExampleController: RouteCollection {
+// struct ExampleController: RouteCollection {
 //    func boot(routes: any RoutesBuilder) {
 //        // Your macro should generate this:
 //        routes.on(.GET, "todos", ":id") { request in
@@ -57,7 +63,7 @@
 //            ),
 //        ])
 //    }
-//}
+// }
 //
 //// The macro should parse decorators like this:
 //// @OpenAPI(path: .type(String.self))

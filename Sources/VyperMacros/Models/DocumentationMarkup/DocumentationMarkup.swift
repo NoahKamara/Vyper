@@ -22,7 +22,8 @@ import Markdown
 /// An abstract shortly describing My Document.
 /// ```
 /// ### Discussion
-/// The parser parses the discussion from the end of the abstract section until the end of the document.
+/// The parser parses the discussion from the end of the abstract section until the end of the
+/// document.
 /// ```
 /// # My Document
 /// An abstract shortly describing My Document.
@@ -182,9 +183,6 @@ extension Markup {
         return result
     }
 }
-
-
-
 
 extension DocumentationMarkup {
     init(text: String) {
