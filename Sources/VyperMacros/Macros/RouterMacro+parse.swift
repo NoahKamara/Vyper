@@ -156,6 +156,22 @@ extension RouterMacro {
     }
 }
 
+
+extension Trivia {
+    func documentationMarkup() -> DocumentationMarkup {
+        let doccComment = self.reduce(into: "") { result, piece in
+            if case .docLineComment(let text) = piece {
+                if !result.isEmpty {
+                    result += "\n"
+                }
+                result += text.trimmingPrefix("/// ")
+            }
+        }
+
+        return DocumentationMarkup(text: doccComment)
+    }
+}
+
 private extension FunctionDeclSyntax {
     var isThrowing: Bool {
         signature.effectSpecifiers?.throwsClause?.throwsSpecifier.tokenKind == .keyword(.throws)

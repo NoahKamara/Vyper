@@ -4,15 +4,14 @@
 //  Copyright © 2024 Noah Kamara.
 //
 
-public struct DocumentationTrait: Trait {
+import VaporToOpenAPI
+
+public struct DocumentationTrait: Trait, RouteTrait, RouterTrait {
     public init() {}
 }
 
 public extension Trait where Self == DocumentationTrait {
     static var excludeFromDocs: Self { Self() }
-}
-
-public extension Trait where Self == DocumentationTrait {
     static func tags(_ tags: Tag...) -> Self { Self() }
 }
 
@@ -26,5 +25,9 @@ public struct Tag {
     public init(name: String, description: String? = nil) {
         self.name = name
         self.description = description
+    }
+
+    public var tagObject: TagObject {
+        TagObject(name: name, description: description)
     }
 }

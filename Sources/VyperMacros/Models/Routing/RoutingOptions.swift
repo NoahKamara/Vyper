@@ -15,6 +15,24 @@ struct RoutingOptions {
         self.path = path
         self.docs = docs
     }
+
+    func inherit(from options: consuming RoutingOptions) -> RoutingOptions {
+        let uniqueTags = (options.docs.tags + self.docs.tags).reduce(
+            into: [DeclReferenceExprSyntax]()
+        ) { partialResult, tag in
+            if !partialResult.contains(tag) {
+                partialResult.append(tag)
+            }
+        }
+
+        return RoutingOptions(
+            path: options.path + self.path,
+            docs: .init(
+                excludeFromDocs: self.docs.excludeFromDocs || options.docs.excludeFromDocs,
+                tags: uniqueTags
+            )
+        )
+    }
 }
 
 struct Traits {
@@ -23,7 +41,7 @@ struct Traits {
 
 struct DocumentationTraits {
     var excludeFromDocs: Bool = false
-    var tags: [DeclReferenceExprSyntax]?
+    var tags: [DeclReferenceExprSyntax] = []
 }
 
 class RoutingOptionsParser {
@@ -118,7 +136,7 @@ class RoutingOptionsParser {
     }
 
     private func parseOptions(name: String, arguments: LabeledExprListSyntax) -> ParseResultKind {
-        if name == "tag" {
+        if name == "tags" {
             self.tags = arguments
                 .compactMap { $0.expression.as(MemberAccessExprSyntax.self)?.declName }
             return .handled

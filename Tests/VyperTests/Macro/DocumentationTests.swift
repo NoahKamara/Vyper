@@ -96,6 +96,92 @@ struct DocumentationTests {
     }
 
     @Test
+    func tags() {
+        assertMacro {
+            """
+            @Router(traits: .tags(.abc, .def))
+            struct TestController {
+                @GET
+                func list() -> Response {
+                    Response(statusCode: 200)
+                }
+            }
+            """
+        } expansion: {
+            """
+            struct TestController {
+                @GET
+                func list() -> Response {
+                    Response(statusCode: 200)
+                }
+            }
+
+            extension TestController: RouteCollection {
+                func boot(routes: any RoutesBuilder) throws {
+                    routes.on(.GET) { request in
+                        return self.list()
+                    }
+                    .openAPI(
+                        tags: Tag.abc.tagObject,
+                        Tag.def.tagObject)
+                }
+            }
+            """
+        }
+    }
+
+//    @Test
+//    func inheritedTags() {
+//        assertMacro {
+//            """
+//            @Router
+//            struct TestController {
+//                /// Lorem ipsum dolor sit amet.
+//                @GET(traits: .excludeFromDocs)
+//                func list() -> Response {
+//                    Response(statusCode: 200)
+//                }
+//            
+//                /// Lorem ipsum dolor sit amet.
+//                @POST
+//                func create() -> Response {
+//                    Response(statusCode: 201)
+//                }
+//            }
+//            """
+//        } expansion: {
+//            """
+//            struct TestController {
+//                /// Lorem ipsum dolor sit amet.
+//                @GET(traits: .excludeFromDocs)
+//                func list() -> Response {
+//                    Response(statusCode: 200)
+//                }
+//            
+//                /// Lorem ipsum dolor sit amet.
+//                @POST
+//                func create() -> Response {
+//                    Response(statusCode: 201)
+//                }
+//            }
+//            
+//            extension TestController: RouteCollection {
+//                func boot(routes: any RoutesBuilder) throws {
+//                    routes.on(.GET) { request in
+//                        return self.list()
+//                    }
+//                    routes.on(.POST) { request in
+//                        return self.create()
+//                    }
+//                    .openAPI(
+//                        summary: "Lorem ipsum dolor sit amet.")
+//                }
+//            }
+//            """
+//        }
+//    }
+
+    @Test
     func abstract() {
         assertMacro {
             """

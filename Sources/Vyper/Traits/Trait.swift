@@ -19,13 +19,17 @@ public extension Route {
     }
 }
 
-public protocol CollectionModifier: Trait {
-    associatedtype Collection: RouteCollection
-    func modify(_ route: some RouteCollection) -> Collection
-}
+public protocol RouteTrait: Trait {}
+public protocol RouterTrait: Trait {}
 
-public extension RouteCollection {
-    func modify<Modifier: CollectionModifier>(_ modifier: Modifier) -> Modifier.Collection {
-        modifier.modify(self)
-    }
-}
+
+//public protocol CollectionModifier: Trait {
+//    associatedtype Collection: RouteCollection
+//    func modify(_ route: some RouteCollection) -> Collection
+//}
+//
+//public extension RouteCollection {
+//    func modify<Modifier: CollectionModifier>(_ modifier: Modifier) -> Modifier.Collection {
+//        modifier.modify(self)
+//    }
+//}

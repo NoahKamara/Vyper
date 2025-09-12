@@ -8,10 +8,6 @@ import InlineSnapshotTesting
 import Testing
 @testable import VyperMacros
 
-extension Tag {
-    @Tag static var syntax: Self
-}
-
 @Suite(.tags(.syntax))
 struct DocumentationMarkupTests {
     @Test("Abstract")

@@ -12,5 +12,6 @@ struct VyperPlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
         DecoratorMacro.self,
         RouterMacro.self,
+        TagMacro.self
     ]
 }

@@ -8,10 +8,6 @@ import MacroTesting
 import Testing
 @testable import VyperMacros
 
-extension Tag {
-    @Tag static var macro: Self
-}
-
 @Suite("RouterMacro: Effect Specifiers", .macros([RouterMacro.self]), .tags(.macro))
 struct EffectSpecifierTests {
     @Test

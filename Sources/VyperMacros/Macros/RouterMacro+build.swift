@@ -56,6 +56,7 @@ extension RouterMacro {
         _ route: RouteDescriptor,
         routerOptions: RoutingOptions
     ) throws -> FunctionCallExprSyntax {
+        let options = route.options.inherit(from: routerOptions)
         let parameterBuilders = try route.parameters.map { try self.buildRouteParameterDecoder($0) }
 
         var routeFunctionCall: any ExprSyntaxProtocol = FunctionCallExprSyntax(
@@ -67,12 +68,12 @@ extension RouterMacro {
             rightParen: .rightParenToken(),
             argumentsBuilder: {
                 route.parameters.map { parameter in
-                    .init(
-                        label: parameter.name,
-                        expression: DeclReferenceExprSyntax(
-                            baseName: .identifier(parameter.name)
+                        .init(
+                            label: parameter.name,
+                            expression: DeclReferenceExprSyntax(
+                                baseName: .identifier(parameter.name)
+                            )
                         )
-                    )
                 }
             }
         )
@@ -99,9 +100,6 @@ extension RouterMacro {
             })
         )
 
-        // Combine Router-level path with route-level path
-        let combinedPath = routerOptions.path + route.path
-
         // routes.on(.GET) {} call
         let funcCall = FunctionCallExprSyntax(
             calledExpression: MemberAccessExprSyntax(
@@ -113,7 +111,7 @@ extension RouterMacro {
             rightParen: .rightParenToken()
         ) {
             LabeledExprSyntax(expression: route.method)
-            combinedPath.map { LabeledExprSyntax(expression: $0) }
+            options.path.map { LabeledExprSyntax(expression: $0) }
         }.with(\.trailingClosure, closure)
 
         // dont generate openapi calls when docs disabled
@@ -174,6 +172,34 @@ extension RouterMacro {
             //        customMethod: <#T##PathItemObject.Method?#>,
             //        spec: <#T##String?#>,
             //        tags: <#T##TagObject...#>,
+
+            if let firstTag = options.docs.tags.first {
+                LabeledExprSyntax(
+                    label: "tags",
+                    expression: MemberAccessExprSyntax(
+                        base: MemberAccessExprSyntax(
+                            base: DeclReferenceExprSyntax(baseName: .identifier("Tag")),
+                            period: .periodToken(),
+                            name: firstTag.baseName
+                        ),
+                        declName: DeclReferenceExprSyntax(baseName: .identifier("tagObject"))
+                    )
+                )
+                options.docs.tags.dropFirst().map { tag in
+                    LabeledExprSyntax(
+                        expression: MemberAccessExprSyntax(
+                            base: MemberAccessExprSyntax(
+                                base: DeclReferenceExprSyntax(baseName: .identifier("Tag")),
+                                period: .periodToken(),
+                                name: tag.baseName
+                            ),
+                            declName: DeclReferenceExprSyntax(baseName: .identifier("tagObject"))
+                        )
+                    )
+                }
+            }
+
+
             if let abstract {
                 LabeledExprSyntax(
                     label: "summary",
