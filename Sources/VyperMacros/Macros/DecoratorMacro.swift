@@ -26,12 +26,6 @@ struct DecoratorMacro: PeerMacro {
             return []
         }
 
-        let diagnostic = diagnostics
-            .severity(.note)
-            .message("@\(decoratorName) found")
-            .build()
-
-        context.diagnose(diagnostic)
         return []
     }
 }
