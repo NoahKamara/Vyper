@@ -36,7 +36,7 @@ package struct TagMacro: AccessorMacro {
 
         let markup = variableDecl.leadingTrivia.documentationMarkup()
 
-        let summary = markup.abstractSection?.paragraph.format()
+        let summary = markup.abstractSection?.format()
         let description = summary?.isEmpty == false ? #""\#(summary!)""# : "nil"
 
         return [

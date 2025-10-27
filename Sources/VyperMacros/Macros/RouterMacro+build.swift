@@ -119,7 +119,7 @@ extension RouterMacro {
             return funcCall
         }
 
-        let abstract: String? = route.markup.abstractSection?.paragraph.format()
+        let abstract: String? = route.markup.abstractSection?.format()
         let discussion: String? = if let discussion = route.markup.discussionSection {
             discussion.content.isEmpty ? nil : discussion.format()
         } else {
@@ -134,12 +134,11 @@ extension RouterMacro {
         var body: MemberAccessExprSyntax? = nil
 
         for parameter in route.parameters {
-            let markup = route.markup.discussionTags?.parameters
+            let markup = route.markup.tags?.parameters
                 .first(
                     where: { $0.name == parameter.name || $0.name == parameter.secondName }
                 )?
                 .contents
-                .map { $0.format() }
                 .joined(separator: "\n")
 
             switch parameter.kind {
@@ -315,7 +314,7 @@ extension RouterMacro {
 
             //        responseHeaders: <#T##OpenAPIParameters?#>,
 
-            if let responseDescription = route.markup.discussionTags?.returns.first?.format() {
+            if let responseDescription = route.markup.tags?.returns.first?.format() {
                 LabeledExprSyntax(
                     label: "responseDescription",
                     expression: StringLiteralExprSyntax(content: responseDescription)

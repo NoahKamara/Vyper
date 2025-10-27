@@ -6,6 +6,7 @@
 
 import SwiftDiagnostics
 import SwiftSyntax
+import DocCMarkup
 
 extension RouterMacro {
     struct ParsingError: Error, CustomStringConvertible {
@@ -74,7 +75,7 @@ extension RouterMacro {
             }
         }
 
-        let documentationMarkup = DocumentationMarkup(text: documentationString)
+        let documentationMarkup = DocumentationMarkup(parsing: documentationString)
 
         return try .init(
             name: function.name.text,
@@ -168,7 +169,7 @@ extension Trivia {
             }
         }
 
-        return DocumentationMarkup(text: doccComment)
+        return DocumentationMarkup(parsing: doccComment)
     }
 }
 

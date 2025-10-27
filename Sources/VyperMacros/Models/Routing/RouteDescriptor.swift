@@ -5,6 +5,7 @@
 //
 
 import SwiftSyntax
+import DocCMarkup
 
 struct RouteDescriptor: CustomStringConvertible {
     struct Parameter: CustomStringConvertible {

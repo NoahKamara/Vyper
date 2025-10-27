@@ -4,6 +4,8 @@
 import CompilerPluginSupport
 import PackageDescription
 
+let LOCAL = true
+
 let package = Package(
     name: "Vyper",
     platforms: [.macOS(.v15), .iOS(.v13), .tvOS(.v13), .watchOS(.v6), .macCatalyst(.v13)],
@@ -40,6 +42,7 @@ let package = Package(
         .macro(
             name: "VyperMacros",
             dependencies: [
+                .product(name: "DocCMarkup", package: "DocCMarkup"),
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
@@ -59,6 +62,7 @@ let package = Package(
         .testTarget(
             name: "VyperTests",
             dependencies: [
+                .product(name: "DocCMarkup", package: "DocCMarkup"),
                 "VyperMacros",
                 "SwiftOpenAPI",
                 .product(name: "InlineSnapshotTesting", package: "swift-snapshot-testing"),
@@ -68,3 +72,14 @@ let package = Package(
         ),
     ]
 )
+
+
+if LOCAL {
+    package.dependencies.append(
+        .package(path: "/Users/noahkamara/Developer/DocCMarkup")
+    )
+} else {
+    package.dependencies.append(
+        .package(url: "https://github.com/noahkamara/DocCMarkup", branch: "main")
+    )
+}
